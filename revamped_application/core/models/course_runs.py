@@ -611,8 +611,8 @@ class RunTrainerEditInfo(AbstractRequestInfo):
         self._name: Annotated[str, "string($varchar(66))"] = None
         self._email: Annotated[str, "string($varchar(320))"] = None
         self._idNumber: Annotated[str, "string($varchar(50))"] = None
-        self._idType_code: Annotated[IdType.value[0], "	string($varchar(2))"] = None
-        self._idType_description: Annotated[IdType.value[1], "	string($varchar(128))"] = None
+        self._idType_code: Annotated[IdType.value[0], "string($varchar(2))"] = None
+        self._idType_description: Annotated[IdType.value[1], "string($varchar(128))"] = None
         self._roles: list[Role] = []
         self._inTrainingProviderProfile: OptionalSelector = None
         self._domainAreaOfPractice: Annotated[Optional[str], "string($varchar(1000))"] = None
