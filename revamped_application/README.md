@@ -13,7 +13,7 @@ on to get started quickly!
 
 ## Local Installation
 
-This application was built using Python 3.12, and it uses the following Python libraries:
+This application was built using `Python 3.12`, and it uses the following Python libraries:
 
 * `streamlit`: Main UI framework
 * `pycodestyle`: Checkstyle for Python
@@ -25,9 +25,13 @@ This application was built using Python 3.12, and it uses the following Python l
 * `certifi`: Provides updated information on Root Certificate Authority
 * `pyOpenSSL`: Provides SSL functionalities
 * `coverage`: Provides code coverage reports for unit tests
+* `email-validator`: Validate Email strings
 
 There are 2 ways to install Python, along with the necessary libraries: Using `Python` directly, or through a package
 and environment manager such as `conda`.
+
+>  ❗ You are **highly recommended** to follow the `conda` installation steps, as it reduces the risk of you accidentally
+> breaking your base Python environment!
 
 ### Python
 
@@ -36,20 +40,17 @@ get the different installers for your Operating System. If you are using Windows
 are using macOS, use the **macOS Installer**; If you are using Linux, refer to [this guide](https://www.geeksforgeeks.org/how-to-install-python-in-ubuntu/)
 on how to install Python 3.12.
 
->  ❗ For Linux, make sure that you **explicitly specify Python version 3.12** in the commands that require specification 
+>  ❗ For **Linux**, make sure that you **explicitly specify Python version 3.12** in the commands that require specification 
 > of Python version.
 
 #### Installation of libraries
 
-After installing Python, open a command prompt or terminal in the same location as this `README.md` file.
-
-Install the required libraries by running the following command:
-
-```shell
-pip install -r requirements.txt
-```
-
-The command should install all the required Python libraries on your system.
+1. After installing Python, open a command prompt or terminal in the same location as this `README.md` file.
+2. Install the required libraries by running the following command:
+    ```shell
+    pip install -r requirements.txt
+    ```
+3. The command should install all the required Python libraries on your system.
 
 > ❓ If your command fails to execute, try replacing `pip` with `pip3` instead!
 
@@ -61,41 +62,35 @@ with Windows, MacOS and Linux.
 
 > ❗ You are highly recommended to use Python package managers to help maintain your Python environments. Installations 
 > on the base environment provided when you first install Python may result in dependency clashes with future 
-> packages you install.
+> packages you install or potentially break your base Python environment!
 
-Refer to the following links to find out more on how to install `conda` on your OS of choice:
-[Windows](https://conda.io/projects/conda/en/latest/user-guide/install/windows.html),
-[MacOS](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html),
-[Linux](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html)
-
-After installing `conda`, open up a command prompt or a terminal in the same location as this `README.md` document.
-
-Run the command:
-
-```shell
-conda create -n [YOUR ENV NAME HERE] python=3.12
-```
-
-> ❗ Make sure to change `[YOUR ENV NAME HERE]` to any name that you desire (e.g. `ssg`, `api`, `demo`, `application`)!
-
-Running the command will create a new `conda` environment with `Python 3.12` installed!
+1. Refer to the following links to find out more on how to install `conda` on your OS of choice:
+   1. [Windows](https://conda.io/projects/conda/en/latest/user-guide/install/windows.html)
+   2. [MacOS](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html)
+   3. [Linux](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html)
+2. After installing `conda`, open up a command prompt or a terminal in the same location as this `README.md` document.
+3. Run the command:
+    ```shell
+    conda create -n [YOUR ENV NAME HERE] python=3.12
+    ```
+   
+    > ❗ Make sure to change `[YOUR ENV NAME HERE]` to any name that you desire (e.g. `ssg`, `api`, `demo`, `application`)!
+4. A new `conda` environment with `Python 3.12` installed!
 
 #### Installation of libraries
 
-After your environment is created, make sure to activate it first. To activate an environment, run the command:
+1. After your environment is created, make sure to activate it first. To activate an environment, run the command:
 
-```shell
-conda activate [YOUR ENV NAME HERE]
-```
+    ```shell
+    conda activate [YOUR ENV NAME HERE]
+    ```
 
-where `[YOUR ENV NAME HERE]` is the same environment name that you used in the previous steps.
+    where `[YOUR ENV NAME HERE]` is the same environment name that you used in the previous steps.
+2. Then, run the following commands to install the required Python libraries into your `conda` environment.
 
-
-Then, run the following commands to install the required Python libraries into your `conda` environment.
-
-```shell
-pip install -r requirements.txt
-```
+    ```shell
+    pip install -r requirements.txt
+    ```
 
 > ❓ If your command fails to execute, try replacing `pip` with `pip3` instead!
 
@@ -118,12 +113,17 @@ address where this application is hosted on!
 
 ## Features
 
-There are 6 main pages of the application. Each page focuses on one particular aspect of the SSG 15 mandated APIs,
+There are 7 main pages of the application. Each page focuses on one particular aspect of the SSG 15 mandated APIs,
 as well as the SkillsFuture Credit API.
 
 The pages are all found within the [pages](pages) folder.
 
-### Demo Code - Authentication
+## En-Decryption
+
+This page contains functions that will help you experiment with the encryption and decryption algorithm that is used
+to encrypt payloads within this API.
+
+### Demo Code
 
 This page contains sample code which you can use in your application to get started with authentication.
 
@@ -191,3 +191,5 @@ Using this API, you can:
 ## Acknowledgements
 
 Many of the backend functions are adapted from the [SSG-API-Testing-Application](../../Sample-Codes/SSG-API-Testing-Application).
+
+Other code reuse is documented throughout the code when necessary.

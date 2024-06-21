@@ -41,13 +41,20 @@ Paste this code at the top of your new Python file:
 import streamlit as st
 
 from revamped_application.core.system.logger import Logger
-from revamped_application.utils.streamlit_utils import init
+from revamped_application.utils.streamlit_utils import init, display_config
 
 init()
 LOGGER = Logger("<YOUR PAGE NAME HERE>")
 
 st.set_page_config(page_title="<YOUR PAGE NAME HERE>")
 
+with st.sidebar:
+    st.header("View Configs")
+    st.markdown("Click the `Configs` button to view your loaded configurations at any time!")
+    if st.button("Configs", key="config_display"):
+        display_config()
+
+st.image("assets/sf.png", width=200)
 ```
 
 The code imports the `streamlit` library into your code and gives it the alias `st`. It also imports a utility function

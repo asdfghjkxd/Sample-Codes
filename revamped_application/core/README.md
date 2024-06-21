@@ -32,6 +32,14 @@ This folder contains core functionality code for the Enrollment APIs.
 This folder contains the different model classes, which represent a series of inputs/outputs provided or required by
 the different APIs.
 
+## `credit`
+
+This folder contains core functionality code for the SkillsFuture Credit Pay APIs. 
+
+## `cipher`
+
+This folder contains the methods used for encrypting and decrypting a payload.
+
 ## `system`
 
 This folder contains system functionalities that the application leverage on to perform housekeeping on the files
