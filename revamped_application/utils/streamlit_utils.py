@@ -35,21 +35,6 @@ def init() -> None:
         st.session_state["url"] = None
 
 
-def check_status() -> bool:
-    """
-    A simple callback function that checks if there are any uninitialised variables in the session state.
-
-    :return: True if all configuration variables are present, else False
-    """
-
-    return all([
-        st.session_state["uen"],
-        st.session_state["encryption_key"],
-        st.session_state["cert_pem"],
-        st.session_state["key_pem"]
-    ])
-
-
 # this is an experimental feature, should it become part of the mainstream API, make sure to deprecate the use
 # of this decorator and replace it with the new syntax
 @st.experimental_dialog("Configs", width="large")
