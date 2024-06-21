@@ -1,0 +1,20 @@
+@startuml
+archimate #pink "User" as user <<actor>>
+
+package "Sample Application" as app {
+     package #lightblue "core" as core
+     package #lightgreen "pages" as pages
+     package #orange "tests" as tests
+     package #lightyellow "utils" as utils
+}
+
+
+'Explicit connections
+user --> pages
+core <--> pages
+tests --> pages
+utils <--> pages
+
+core --> utils
+tests --> utils
+@enduml
