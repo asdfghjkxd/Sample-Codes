@@ -153,6 +153,12 @@ package core {
             CONFIRMED
             CANCELLED
         }
+
+        enum OptionalSelector {
+            NIL
+            YES
+            NO
+        }
     }
 }
 @enduml

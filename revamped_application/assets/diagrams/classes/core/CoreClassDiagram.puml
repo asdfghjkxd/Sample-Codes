@@ -2,7 +2,7 @@
 skinparam linetype polyline
 skinparam linetype ortho
 
-title High Level Class Diagram Of Core Package
+title High-level core Class Diagram
 
 package core {
     package constants {
@@ -155,6 +155,12 @@ package core {
             CONFIRMED
             CANCELLED
         }
+
+        enum OptionalSelector {
+            NIL
+            YES
+            NO
+        }
     }
 
     package abc {
@@ -286,7 +292,6 @@ package core {
 
         ViewCourseSessions -up|> AbstractRequest
         AddCourseRun -up[hidden]-> EditCourseRun
-
     }
 
     package models {
@@ -393,15 +398,6 @@ package core {
             CreateEnrolmentInfo -up-|> AbstractRequestInfo
             SearchEnrolmentInfo -up-|> AbstractRequestInfo
         }
-
-        enrolment --up[hidden]-> attendance
-        enrolment --up[hidden]-> assessment
-        enrolment --up[hidden]-> "course_runs"
-        enrolment --right[hidden]-> "course_runs"
-        attendance --up[hidden]-> assessment
-        attendance -up[hidden]-> "course_runs"
-        attendance -up[hidden]-> assessment
-
     }
 
     package system {
@@ -441,6 +437,5 @@ package core {
 
     constants -up[hidden]-> assessment
     constants -up[hidden]-> enrolment
-
 }
 @enduml

@@ -1,6 +1,7 @@
 @startuml
 skinparam linetype polyline
 skinparam linetype ortho
+title High-level utils Class Diagram
 
 package utils {
     package http_utils {
@@ -34,7 +35,7 @@ package utils {
     }
 
     package streamlit_utils {
-        class "Static Context" {
+        class "Static Context" as susc {
             + init(): None {static}
             + display_config(): None {static}
             + http_code_handler(Union[int, str]): None {static}}
@@ -72,4 +73,7 @@ package utils {
     streamlit_utils --up[hidden]-> json_utils
     verify --up[hidden]-> http_utils
 }
+
+HttpRequest ..> StringBuilder
+susc ..> HttpRequest
 @enduml
