@@ -106,7 +106,7 @@ sg_ingress = ec2.authorize_security_group_ingress(
 )
 
 launch_template = ec2.create_launch_template(
-    LaunchTemplateName="ssg-wsg-launch-template",
+    LaunchTemplateName="ssg-wsg-app-launch-template",
     LaunchTemplateData={
         "BlockDeviceMappings": [
             {
