@@ -219,14 +219,28 @@ ecs = boto3.client("ecs", config=config)
 
 # create capacity provider
 LOGGER.info("Creating capacity provider...")
-capacity_provider = ecs.create_capacity_provider(
-    name="ssg-capacity-provider",
-    autoScalingGroupProvider={
-        "autoScalingGroupArn": group_details['AutoScalingGroups'][0]['AutoScalingGroupARN'],
-    }
-)
-LOGGER.info(f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
-
+try:
+    capacity_provider = ecs.create_capacity_provider(
+        name="ssg-capacity-provider",
+        autoScalingGroupProvider={
+            "autoScalingGroupArn": group_details['AutoScalingGroups'][0]['AutoScalingGroupARN'],
+        }
+    )
+    LOGGER.info(f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
+except ClientError as ex:
+    LOGGER.info(f"Error: {ex}, attempting to delete and re-create the provider...")
+    ecs.delete_capacity_provider(
+        capacityProvider="ssg-capacity-provider"
+    )
+    capacity_provider = ecs.create_capacity_provider(
+        name="ssg-capacity-provider",
+        autoScalingGroupProvider={
+            "autoScalingGroupArn": group_details['AutoScalingGroups'][0]['AutoScalingGroupARN'],
+        }
+    )
+    LOGGER.info(
+        f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
+    
 while True:
     if ecs.describe_capacity_providers(
         capacityProviders=[
