@@ -152,13 +152,13 @@ try:
                         "Encrypted": False,
                         "Iops": 3000,
                         "DeleteOnTermination": True,
-                        "VolumeSize": 15,
+                        "VolumeSize": 30,
                         "VolumeType": "gp3",
                         "Throughput": 300,
                     }
                 }
             ],
-            "ImageId": "ami-07e78ae565ee4629f",  # CHANGE THIS TO YOUR AMI ID,
+            "ImageId": "ami-0153fd8c2692db1b7",  # CHANGE THIS TO YOUR AMI ID,
             "InstanceType": "t2.micro",
             "CreditSpecification": {
                 "CpuCredits": "standard"
