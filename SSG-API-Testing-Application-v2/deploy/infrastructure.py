@@ -241,15 +241,6 @@ except ClientError as ex:
     LOGGER.info(
         f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
 
-while True:
-    if ecs.describe_capacity_providers(
-        capacityProviders=[
-            capacity_provider["capacityProvider"]["capacityProviderArn"]
-        ]
-    )["capacityProviders"][0]["status"] == "ACTIVE":
-        break
-
-    time.sleep(1)
 
 # create ECS cluster
 LOGGER.info("Creating ECS cluster...")
