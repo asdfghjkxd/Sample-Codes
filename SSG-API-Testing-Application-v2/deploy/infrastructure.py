@@ -5,6 +5,8 @@ Inspired from https://aws.plainenglish.io/creating-vpc-using-boto3-terraform-clo
 """
 
 import os
+import time
+
 import boto3
 import logging
 
@@ -224,6 +226,16 @@ capacity_provider = ecs.create_capacity_provider(
     }
 )
 LOGGER.info(f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
+
+while True:
+    if ecs.describe_capacity_providers(
+        capacityProviders=[
+            capacity_provider["capacityProvider"]["capacityProviderArn"]
+        ]
+    )["capacityProviders"][0]["status"] == "ACTIVE":
+        break
+
+    time.sleep(1)
 
 # create ECS cluster
 LOGGER.info("Creating ECS cluster...")
