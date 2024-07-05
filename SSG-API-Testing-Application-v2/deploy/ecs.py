@@ -35,6 +35,12 @@ task_definition = ecs.register_task_definition(
                     "appProtocol": "http"
                 }
             ],
+            "healthCheck": {
+                "command": ["CMD-SHELL", "curl -f http://localhost:8502/ || exit 1"],
+                "interval": 60,
+                "timeout": 15,
+                "retries": 3
+            },
             "essential": True,
             "disableNetworking": False,
             "privileged": True,
@@ -46,12 +52,6 @@ task_definition = ecs.register_task_definition(
     requiresCompatibilities=[
         "EC2"
     ],
-    healthCheck={
-        "command": ["CMD-SHELL", "curl -f http://localhost:8502/ || exit 1"],
-        "interval": 60,
-        "timeout": 15,
-        "retries": 3
-    },
     runtimePlatform={
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
