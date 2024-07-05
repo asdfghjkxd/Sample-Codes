@@ -206,17 +206,10 @@ LOGGER.info(f"Auto scaling group created successfully! "
 ecr = boto3.client("ecr", config=config)
 
 LOGGER.info("Creating ECR repository...")
+registry = ecr.describe_registry()
 repo = ecr.create_repository(
     repositoryName=os.getenv("ECR_REPO_NAME"),
-    catalogData={
-        "description": "SSG-WSG Sample Application",
-        "architectures": [
-            "X86_64"
-        ],
-        "operatingSystems": [
-            "LINUX"
-        ]
-    }
+    registryId=registry["registryId"]
 )
 LOGGER.info(f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
 
