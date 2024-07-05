@@ -9,6 +9,7 @@ name: Run Tests and Deploy to AWS
 on: [push, pull_request]
 
 env:
+  BOTO3_DEPENDENCY: "1.34.139"
   PYTHON_VERSION: "3.12"
   ECR_REPO_NAME: "ssg-sample-application"
   AWS_REGION: "ap-southeast-1"
@@ -72,7 +73,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./SSG-API-Testing-Application-v2/app
-        run: pip install -r requirements.txt
+        run: pip install boto3==${{ env.BOTO3_DEPENDENCY }}
 
       - name: Build Base Cloud Infrastructure
         working-directory: ./SSG-API-Testing-Application-v2/deploy

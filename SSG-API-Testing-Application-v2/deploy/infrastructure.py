@@ -39,7 +39,7 @@ ec2.attach_internet_gateway(
 )
 
 # create a routing table
-rt = ec2.create_route_table()
+rt = ec2.create_route_table(VpcId=vpc["Vpc"]["VpcId"])
 route = ec2.create_route(
     DestinationCidrBlock="0.0.0.0/0",
     GatewayId=ig["InternetGateway"]["InternetGatewayId"],
