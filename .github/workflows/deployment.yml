@@ -13,6 +13,7 @@ env:
   AWS_REGION: "ap-southeast-1"
   ECS_CONTAINER_NAME: "app"   # should be the same as containerDefinitions of task definition file
   ECS_SERVICE_NAME: "ssg-ecs-service"
+  SG_GROUP_NAME: "ssg-wsg-sg"
 
 jobs:
   deploy:
@@ -37,12 +38,12 @@ jobs:
 
       - name: Build Base Cloud Infrastructure
         working-directory: ./SSG-API-Testing-Application-v2/deploy
-        run: python infrastructure.py
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           SG_GROUP_NAME: ${{ env.SG_GROUP_NAME }}
+        run: python infrastructure.py
 
       - name: Configure AWS Credentials
         id: configure-credentials

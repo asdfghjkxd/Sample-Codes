@@ -5,7 +5,6 @@ Inspired from https://aws.plainenglish.io/creating-vpc-using-boto3-terraform-clo
 """
 
 import os
-import time
 
 import boto3
 import logging
