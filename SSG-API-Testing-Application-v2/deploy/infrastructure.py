@@ -140,7 +140,7 @@ asg = boto3.client("autoscaling", config=config)
 asg_group = asg.create_auto_scaling_group(
     AutoScalingGroupName="ssg-wsg-asg",
     LaunchTemplate={
-        "LaunchTemplateId": launch_template["LaunchTemplateId"],
+        "LaunchTemplateId": launch_template["LaunchTemplate"]["LaunchTemplateId"],
         "Version": "$Latest"
     },
     MaxSize=1,
