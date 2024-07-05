@@ -59,8 +59,10 @@ subnet2 = ec2.create_subnet(
     VpcId=vpc["Vpc"]["VpcId"]
 )
 
-ec2.associate_with_subnet(SubnetId=subnet1["Subnet"]["SubnetId"])
-ec2.associate_with_subnet(SubnetId=subnet2["Subnet"]["SubnetId"])
+table = boto3.resource("ec2").RouteTable(rt["RouteTable"]["RouteTableId"])
+
+table.associate_with_subnet(SubnetId=subnet1["Subnet"]["SubnetId"])
+table.associate_with_subnet(SubnetId=subnet2["Subnet"]["SubnetId"])
 
 # form the required Security Groups, Ingress Rules and Launch Templates
 sg = ec2.create_security_group(
