@@ -25,43 +25,43 @@ vpc = ec2.create_vpc(
 
 # enable public DNS hostname for SSH
 ec2.modify_vpc_attribute(
-    VpcId=vpc.id, EnableDnsSupport={"Value": True}
+    VpcId=vpc["Vpc"]["VpcId"], EnableDnsSupport={"Value": True}
 )
 ec2.modify_vpc_attribute(
-    VpcId=vpc.id, EnableDnsHostnames={"Value": True}
+    VpcId=vpc["Vpc"]["VpcId"], EnableDnsHostnames={"Value": True}
 )
 
 # create internet gateway
 ig = ec2.create_internet_gateway()
-vpc.attach_internet_gateway(InternetGatewayId=ig.id)
+vpc.attach_internet_gateway(InternetGatewayId=ig["InternetGateway"]["InternetGatewayId"])
 
 # create a routing table
 rt = vpc.create_route_table()
 route = rt.create_route(
-    DestinationCidrBlock="0.0.0.0/0", GatewayId=ig.id
+    DestinationCidrBlock="0.0.0.0/0", GatewayId=ig["InternetGateway"]["InternetGatewayId"]
 )
 
 # create subnets and associate it with the routing table
 subnet1 = ec2.create_subnet(
     AvailabilityZone="ap-southeast-1a",
     CidrBlock="172.16.32.0/20",
-    VpcId=vpc.id
+    VpcId=vpc["Vpc"]["VpcId"]
 )
 
 subnet2 = ec2.create_subnet(
     AvailabilityZone="ap-southeast-1b",
     CidrBlock="172.16.16.0/20",
-    VpcId=vpc.id
+    VpcId=vpc["Vpc"]["VpcId"]
 )
 
-rt.associate_with_subnet(SubnetId=subnet1.id)
-rt.associate_with_subnet(SubnetId=subnet2.id)
+rt.associate_with_subnet(SubnetId=subnet1["Subnet"]["SubnetId"])
+rt.associate_with_subnet(SubnetId=subnet2["Subnet"]["SubnetId"])
 
 # form the required Security Groups, Ingress Rules and Launch Templates
 sg = ec2.create_security_group(
     Description="Security group for SSG-WSG Sample Application",
     GroupName=SG_GROUP_NAME,
-    VpcId=vpc.id  # CHANGE THIS TO YOUR VPC ID IN THE REGION
+    VpcId=vpc["Vpc"]["VpcId"]  # CHANGE THIS TO YOUR VPC ID IN THE REGION
 )
 
 sg_ingress = ec2.authorize_security_group_ingress(
@@ -169,10 +169,11 @@ repo = ecr.create_repository(
 env_file = os.getenv("GITHUB_ENV")
 
 with open(env_file, "a") as f:
-    f.write(f"VPC_ID={vpc.id}\n")
+    f.write(f"VPC_ID={vpc["Vpc"]["VpcId"]}\n")
+    f.write(f"INTERNET_GATEWAY_ID={ig["InternetGateway"]["InternetGatewayId"]}\n")
     f.write(f"ASG_ARN={asg_group["AutoScalingGroups"][0]["AutoScalingGroupARN"]}\n")
-    f.write(f"SUBNET1_ID={subnet1.id}\n")
-    f.write(f"SUBNET2_ID={subnet2.id}\n")
+    f.write(f"SUBNET1_ID={subnet1["Subnet"]["SubnetId"]}\n")
+    f.write(f"SUBNET2_ID={subnet2["Subnet"]["SubnetId"]}\n")
     f.write(f"SECURITY_GROUP_ID={sg['GroupId']}\n")
     f.write(f"LAUNCH_TEMPLATE_ID={launch_template['LaunchTemplate']['LaunchTemplateId']}\n")
     f.write(f"ECR_REPO_URI={repo['repository']['repositoryUri']}\n")
