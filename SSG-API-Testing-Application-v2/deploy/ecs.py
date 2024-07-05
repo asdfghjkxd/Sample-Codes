@@ -26,9 +26,10 @@ config = Config(
 ecs = boto3.client("ecs", config=config)
 
 # create task definition
+LOGGER.info("Creating task definition...")
 task_definition = ecs.register_task_definition(
     family="app",
-    networkMode="bridge",
+    networkMode="awsvpc",
     containerDefinitions=[
         {
             "memory": 512,
@@ -65,6 +66,7 @@ task_definition = ecs.register_task_definition(
         "operatingSystemFamily": "LINUX"
     }
 )
+LOGGER.info(f"Task definition created successfully! Task Definition ARN: {task_definition['taskDefinition']['taskDefinitionArn']}")
 
 create_service = ecs.create_service(
     cluster=os.getenv("ECS_CLUSTER_ARN"),
