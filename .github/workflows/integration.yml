@@ -7,6 +7,9 @@
 name: Run Tests and Deploy to AWS
 
 #on: [push, pull_request]
+on:
+  workflow_dispatch:
+
 
 env:
   BOTO3_DEPENDENCY: "1.34.139"

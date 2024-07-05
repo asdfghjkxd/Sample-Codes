@@ -262,10 +262,25 @@ automated deployment!
 
 --------------------------------------------
 
-SUBNET_1_ID: {subnet1["Subnet"]["SubnetId"]}
-SUBNET_2_ID: {subnet2["Subnet"]["SubnetId"]}
+SUBNET1_ID: {subnet1["Subnet"]["SubnetId"]}
+SUBNET2_ID: {subnet2["Subnet"]["SubnetId"]}
+SECURITY_GROUP_ID: {sg['GroupId']}
 ECS_CLUSTER_ARN: {create_cluster["cluster"]["clusterArn"]}
 
 ############################################
 """)
+
+LOGGER.info("Writing environment variables to GitHub Actions environment file...")
+github = os.getenv("GITHUB_ENV")
+# taken from
+# https://stackoverflow.com/questions/70123328/how-to-set-environment-variables-in-github-actions-using-python
+env_file = os.getenv("GITHUB_ENV")
+
+with open(env_file, "a") as f:
+    f.write(f"SUBNET1_ID={subnet1["Subnet"]["SubnetId"]}\n")
+    f.write(f"SUBNET2_ID={subnet2["Subnet"]["SubnetId"]}\n")
+    f.write(f"SECURITY_GROUP_ID={sg['GroupId']}\n")
+    f.write(f"ECS_CLUSTER_ARN={create_cluster['cluster']['clusterArn']}\n")
+
+LOGGER.info("Environment variables written to GitHub Actions environment file successfully!")
 LOGGER.info("Exiting...")
