@@ -8,10 +8,6 @@ import os
 import boto3
 
 from botocore.config import Config
-from app.core.system.logger import Logger
-
-# create logger
-LOGGER = Logger("cloudformation")
 
 # define parameters to be used in the stack
 SG_GROUP_NAME = "ssg-wsg"
