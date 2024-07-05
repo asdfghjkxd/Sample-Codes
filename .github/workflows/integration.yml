@@ -16,7 +16,7 @@ env:
   ECS_TASK_DEFINITION: "./revamped-application/deploy/task-definition.json"
   ECS_CONTAINER_NAME: "app"   # should be the same as containerDefinitions of task definition file
   ECS_SERVICE_NAME: ""
-  ECS_CLUSTER_ARN: ""
+  ECS_CLUSTER_ARN: "arn:aws:ecs:ap-southeast-1:730335480348:cluster/ssg-ecs-app"
   SG_GROUP_NAME: "ssg-wsg-sg"
 
 jobs:
@@ -76,16 +76,6 @@ jobs:
         working-directory: ./SSG-API-Testing-Application-v2/app
         run: pip install boto3==${{ env.BOTO3_DEPENDENCY }}
 
-      - name: Set up Infrastructure
-        working-directory: ./SSG-API-Testing-Application-v2/deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
-          SG_GROUP_NAME: ${{ env.SG_GROUP_NAME }}
-        run: |
-          python infrastructure.py
-
       - name: Configure AWS Credentials
         id: configure-credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -108,7 +98,7 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "ECS_IMAGE=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Set up ECS Cluster
         working-directory: ./SSG-API-Testing-Application-v2/deploy
@@ -116,8 +106,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
-          ECS_SERVICE_NAME: ${{ env.ECS_SERVICE_NAME }}
-          ECS_CLUSTER_ARN: ${{ env.ECS_CLUSTER_ARN }}
-          ECS_CONTAINER_NAME: ${{ env.ECS_CONTAINER_NAME }}
+          ECS_IMAGE: ${{ steps.create-and-push-docker-image.outputs.image }}
+          SUBNET1_ID: "subnet-0bec82cb68a0d38fb"
+          SUBNET2_ID: "subnet-04c6ebc504ec9d961"
+          SECURITY_GROUP_ID: "sg-098e1a2e7a382c8b6"
         run: |
           python ecs.py

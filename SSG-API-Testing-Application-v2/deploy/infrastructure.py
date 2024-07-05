@@ -271,8 +271,9 @@ automated deployment!
 
 --------------------------------------------
 
+SUBNET_1_ID: {subnet1["Subnet"]["SubnetId"]}
+SUBNET_2_ID: {subnet2["Subnet"]["SubnetId"]}
 ECS_CLUSTER_ARN: {create_cluster["cluster"]["clusterArn"]}
-
 
 ############################################
 """)

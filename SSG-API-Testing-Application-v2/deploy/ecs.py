@@ -6,11 +6,17 @@ Inspired from https://aws.plainenglish.io/creating-vpc-using-boto3-terraform-clo
 
 import os
 import boto3
+import logging
 
 from botocore.config import Config
 
 # define parameters to be used in the stack
 SG_GROUP_NAME = "ssg-wsg"
+LOGGER = logging.getLogger("infra")
+LOGGER.setLevel(logging.INFO)
+STREAM_HANDLER = logging.StreamHandler()
+STREAM_HANDLER.setLevel(logging.INFO)
+LOGGER.addHandler(STREAM_HANDLER)
 
 config = Config(
     region_name="ap-southeast-1"  # CHANGE THIS TO YOUR REGION OF CHOICE
@@ -19,7 +25,7 @@ config = Config(
 # create ECS client
 ecs = boto3.client("ecs", config=config)
 
-
+# create task definition
 task_definition = ecs.register_task_definition(
     family="app",
     networkMode="bridge",
@@ -68,6 +74,7 @@ create_service = ecs.create_service(
         "awsvpcConfiguration": {
             "subnets": [
                 os.getenv("SUBNET1_ID"),  # SPECIFY YOUR SUBNET IDs HERE
+                os.getenv("SUBNET2_ID"),  # SPECIFY YOUR SUBNET IDs HERE
             ],
             "securityGroups": [
                 os.getenv("SECURITY_GROUP_ID")
