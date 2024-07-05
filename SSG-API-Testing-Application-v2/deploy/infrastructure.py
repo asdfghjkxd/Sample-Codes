@@ -159,7 +159,7 @@ try:
                     }
                 }
             ],
-            "ImageId": "ami-06d753822bd94c64e",  # CHANGE THIS TO YOUR AMI ID,
+            "ImageId": "ami-0e6ac2b8d66883414",  # CHANGE THIS TO YOUR AMI ID,
             "InstanceType": "t2.micro",
             "CreditSpecification": {
                 "CpuCredits": "standard"
