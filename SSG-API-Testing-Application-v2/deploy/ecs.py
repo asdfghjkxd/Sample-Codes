@@ -84,7 +84,6 @@ create_service = ecs.create_service(
             "securityGroups": [
                 os.getenv("SECURITY_GROUP_ID")
             ],
-            "assignPublicIp": "ENABLED"
         }
     },
     schedulingStrategy="REPLICA",
