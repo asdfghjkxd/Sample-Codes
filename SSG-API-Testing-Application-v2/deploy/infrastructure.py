@@ -23,8 +23,6 @@ vpc = ec2.create_vpc(
     CidrBlock="172.16.0.0/16"
 )
 
-vpc.wait_until_available()
-
 # enable public DNS hostname for SSH
 ec2.modify_vpc_attribute(
     VpcId=vpc.id, EnableDnsSupport={"Value": True}
