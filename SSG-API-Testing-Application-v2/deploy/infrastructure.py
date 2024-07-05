@@ -149,7 +149,8 @@ asg_group = asg.create_auto_scaling_group(
     AvailabilityZones=[
         "ap-southeast-1a",
         "ap-southeast-1b"
-    ]
+    ],
+    VPCZoneIdentifier=f"{subnet1['Subnet']['SubnetId']},{subnet2['Subnet']['SubnetId']}",
 )
 
 # create ecr repo
