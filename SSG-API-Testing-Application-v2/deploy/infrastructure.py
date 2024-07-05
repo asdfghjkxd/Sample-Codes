@@ -240,7 +240,7 @@ except ClientError as ex:
     )
     LOGGER.info(
         f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
-    
+
 while True:
     if ecs.describe_capacity_providers(
         capacityProviders=[
@@ -256,7 +256,7 @@ LOGGER.info("Creating ECS cluster...")
 create_cluster = ecs.create_cluster(
     clusterName="ssg-ecs-app",
     capacityProviders=[
-        capacity_provider["capacityProvider"]["capacityProviderArn"]
+        "ssg-capacity-provider"
     ]
 )
 LOGGER.info(f"ECS cluster created successfully! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
