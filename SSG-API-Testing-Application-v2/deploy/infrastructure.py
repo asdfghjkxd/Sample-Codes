@@ -81,7 +81,7 @@ sg_ingress = ec2.authorize_security_group_ingress(
             "IpProtocol": "tcp",
             "IpRanges": [
                 {
-                    "CidrIp": "0.0.0.0/32",
+                    "CidrIp": "0.0.0.0/0",
                     "Description": "Allow HTTP traffic from anywhere"
                 }
             ],
@@ -95,7 +95,7 @@ sg_ingress = ec2.authorize_security_group_ingress(
             "IpProtocol": "tcp",
             "IpRanges": [
                 {
-                    "CidrIp": "0.0.0.0/32",
+                    "CidrIp": "0.0.0.0/0",
                     "Description": "Allow HTTPS traffic from anywhere"
                 }
             ],
