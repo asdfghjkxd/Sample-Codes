@@ -78,10 +78,10 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           ECS_CLUSTER_ARB: ${{ env.ECS_CLUSTER_ARN }}
           ECS_IMAGE: ${{ steps.create-and-push-docker-image.outputs.image }}
-          SUBNET1_ID: "subnet-0bec82cb68a0d38fb"
-          SUBNET2_ID: "subnet-04c6ebc504ec9d961"
-          SECURITY_GROUP_ID: "sg-098e1a2e7a382c8b6"
-          ECS_CLUSTER_ARN: "arn:aws:ecs:ap-southeast-1:730335480348:cluster/ssg-ecs-app"
+          SUBNET1_ID: ${{ env.SUBNET1_ID }}
+          SUBNET2_ID: ${{ env.SUBNET2_ID }}
+          SECURITY_GROUP_ID: ${{ env.SECURITY_GROUP_ID }}
+          ECS_CLUSTER_ARN: ${{ env.ECS_CLUSTER_ARN }}
           ECS_SERVICE_NAME: "ssg-ecs-service"
         run: |
           python ecs.py

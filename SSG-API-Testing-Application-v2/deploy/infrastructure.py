@@ -253,6 +253,7 @@ create_cluster = ecs.create_cluster(
 LOGGER.info(f"ECS cluster created successfully! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
 
 LOGGER.info(f"""
+\n
 ############################################
 !Infrastructure Setup Info!
 
@@ -268,6 +269,7 @@ SECURITY_GROUP_ID: {sg['GroupId']}
 ECS_CLUSTER_ARN: {create_cluster["cluster"]["clusterArn"]}
 
 ############################################
+\n
 """)
 
 LOGGER.info("Writing environment variables to GitHub Actions environment file...")
