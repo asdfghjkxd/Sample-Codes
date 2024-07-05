@@ -31,6 +31,8 @@ task_definition = ecs.register_task_definition(
     networkMode="bridge",
     containerDefinitions=[
         {
+            "memory": 512,
+            "cpu": 512,
             "name": os.getenv("ECS_CONTAINER_NAME"),
             "image": os.getenv("ECS_IMAGE"),
             "portMappings": [

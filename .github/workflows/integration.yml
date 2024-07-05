@@ -15,7 +15,6 @@ env:
   AWS_REGION: "ap-southeast-1"
   ECS_TASK_DEFINITION: "./revamped-application/deploy/task-definition.json"
   ECS_CONTAINER_NAME: "app"   # should be the same as containerDefinitions of task definition file
-  ECS_SERVICE_NAME: ""
   ECS_CLUSTER_ARN: "arn:aws:ecs:ap-southeast-1:730335480348:cluster/ssg-ecs-app"
   SG_GROUP_NAME: "ssg-wsg-sg"
 
@@ -106,9 +105,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          ECS_CLUSTER_ARB: ${{ env.ECS_CLUSTER_ARN }}
           ECS_IMAGE: ${{ steps.create-and-push-docker-image.outputs.image }}
           SUBNET1_ID: "subnet-0bec82cb68a0d38fb"
           SUBNET2_ID: "subnet-04c6ebc504ec9d961"
           SECURITY_GROUP_ID: "sg-098e1a2e7a382c8b6"
+          ECS_CLUSTER_ARN: "arn:aws:ecs:ap-southeast-1:730335480348:cluster/ssg-ecs-app"
+          ECS_SERVICE_NAME: "ssg-ecs-service"
         run: |
           python ecs.py
