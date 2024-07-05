@@ -33,12 +33,17 @@ ec2.modify_vpc_attribute(
 
 # create internet gateway
 ig = ec2.create_internet_gateway()
-vpc.attach_internet_gateway(InternetGatewayId=ig["InternetGateway"]["InternetGatewayId"])
+ec2.attach_internet_gateway(
+    VpcId=vpc["Vpc"]["VpcId"],
+    InternetGatewayId=ig["InternetGateway"]["InternetGatewayId"]
+)
 
 # create a routing table
-rt = vpc.create_route_table()
-route = rt.create_route(
-    DestinationCidrBlock="0.0.0.0/0", GatewayId=ig["InternetGateway"]["InternetGatewayId"]
+rt = ec2.create_route_table()
+route = ec2.create_route(
+    DestinationCidrBlock="0.0.0.0/0",
+    GatewayId=ig["InternetGateway"]["InternetGatewayId"],
+    RouteTableId=rt["RouteTable"]["RouteTableId"]
 )
 
 # create subnets and associate it with the routing table
