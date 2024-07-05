@@ -34,4 +34,4 @@ jobs:
 
       - name: Build Base Cloud Infrastructure
         working-directory: ./SSG-API-Testing-Application-v2/deploy
-        run: python create_base_infrastructure.py
+        run: python infrastructure.py

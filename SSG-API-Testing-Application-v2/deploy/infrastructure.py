@@ -12,7 +12,6 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 # define parameters to be used in the stack
-SG_GROUP_NAME = "ssg-wsg"
 LOGGER = logging.getLogger("infra")
 LOGGER.setLevel(logging.INFO)
 STREAM_HANDLER = logging.StreamHandler()
@@ -98,7 +97,7 @@ LOGGER.info("Routing table associated with subnets successfully!")
 LOGGER.info("Creating security group...")
 sg = ec2.create_security_group(
     Description="Security group for SSG-WSG Sample Application",
-    GroupName=SG_GROUP_NAME,
+    GroupName=os.getenv("SG_GROUP_NAME"),
     VpcId=vpc["Vpc"]["VpcId"]  # CHANGE THIS TO YOUR VPC ID IN THE REGION
 )
 LOGGER.info(f"Security group created successfully! Security Group ID: {sg['GroupId']}")
@@ -213,21 +212,42 @@ repo = ecr.create_repository(
 )
 LOGGER.info(f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
 
-# taken from
-# https://stackoverflow.com/questions/70123328/how-to-set-environment-variables-in-github-actions-using-python
-env_file = os.getenv("GITHUB_ENV")
+# create ECS client
+ecs = boto3.client("ecs", config=config)
 
-LOGGER.info("Writing environment variables to GitHub Actions environment file...")
-with open(env_file, "a") as f:
-    f.write(f"VPC_ID={vpc["Vpc"]["VpcId"]}\n")
-    f.write(f"INTERNET_GATEWAY_ID={ig["InternetGateway"]["InternetGatewayId"]}\n")
-    f.write(f"ASG_ARN={group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]}\n")
-    f.write(f"SUBNET1_ID={subnet1["Subnet"]["SubnetId"]}\n")
-    f.write(f"SUBNET2_ID={subnet2["Subnet"]["SubnetId"]}\n")
-    f.write(f"SECURITY_GROUP_ID={sg['GroupId']}\n")
-    f.write(f"LAUNCH_TEMPLATE_ID={launch_template['LaunchTemplate']['LaunchTemplateId']}\n")
-    f.write(f"ECR_REPO_URI={repo['repository']['repositoryUri']}\n")
-    f.write(f"ECR_REGISTRY={repo['repository']['registryId']}\n")
-    f.write(f"ECR_REPO_NAME={repo['repository']['repositoryName']}\n")
-LOGGER.info("Environment variables written to GitHub Actions environment file successfully!")
+# create capacity provider
+LOGGER.info("Creating capacity provider...")
+capacity_provider = ecs.create_capacity_provider(
+    name="ssg-capacity-provider",
+    autoScalingGroupProvider={
+        "autoScalingGroupArn": group_details['AutoScalingGroups'][0]['AutoScalingGroupARN'],
+    }
+)
+LOGGER.info(f"Capacity provider created successfully! Capacity Provider ARN: {capacity_provider['capacityProvider']['capacityProviderArn']}")
+
+# create ECS cluster
+LOGGER.info("Creating ECS cluster...")
+create_cluster = ecs.create_cluster(
+    clusterName="ssg-ecs-app",
+    capacityProviders=[
+        capacity_provider["capacityProvider"]["capacityProviderArn"]
+    ]
+)
+LOGGER.info(f"ECS cluster created successfully! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
+
+LOGGER.info(f"""
+############################################
+!Infrastructure Setup Info!
+
+Paste the following values into the 
+integration.yml GitHub Actions file for
+automated deployment!
+
+--------------------------------------------
+
+ECS_CLUSTER_ARN: {create_cluster["cluster"]["clusterArn"]}
+
+
+############################################
+""")
 LOGGER.info("Exiting...")

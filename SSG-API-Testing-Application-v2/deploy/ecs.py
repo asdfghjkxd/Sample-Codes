@@ -17,35 +17,15 @@ config = Config(
 )
 
 # create ECS client
-ecs = boto3.resource("ecs", config=config)
+ecs = boto3.client("ecs", config=config)
 
-# create ECS cluster
-capacity_provider = ecs.create_capacity_provider(
-    name="ssg-capacity-provider",
-    autoScalingGroupProvider={
-        "autoScalingGroupArn": os.getenv("ASG_ARN"),
-        "managedScaling": {
-            "status": "ENABLED",
-            "targetCapacity": 1,
-            "minimumScalingStepSize": 1,
-            "maximumScalingStepSize": 1
-        },
-    }
-)
-
-create_cluster = ecs.create_cluster(
-    clusterName=os.getenv("ECS_CLUSTER_NAME"),
-    capacityProviders=[
-        capacity_provider["capacityProvider"]["capacityProviderArn"]
-    ]
-)
 
 task_definition = ecs.register_task_definition(
     family="app",
     networkMode="bridge",
     containerDefinitions=[
         {
-            "name": "app",
+            "name": os.getenv("ECS_CONTAINER_NAME"),
             "image": os.getenv("ECS_IMAGE"),
             "portMappings": [
                 {
@@ -79,7 +59,7 @@ task_definition = ecs.register_task_definition(
 )
 
 create_service = ecs.create_service(
-    cluster=create_cluster["cluster"]["clusterArn"],
+    cluster=os.getenv("ECS_CLUSTER_ARN"),
     serviceName=os.getenv("ECS_SERVICE_NAME"),
     taskDefinition=task_definition["taskDefinition"]["taskDefinitionArn"],
     desiredCount=1,
@@ -88,7 +68,6 @@ create_service = ecs.create_service(
         "awsvpcConfiguration": {
             "subnets": [
                 os.getenv("SUBNET1_ID"),  # SPECIFY YOUR SUBNET IDs HERE
-                os.getenv("SUBNET2_ID"),  # SPECIFY YOUR SUBNET IDs HERE
             ],
             "securityGroups": [
                 os.getenv("SECURITY_GROUP_ID")
@@ -108,7 +87,5 @@ create_service = ecs.create_service(
 env_file = os.getenv("GITHUB_ENV")
 
 with open(env_file, "a") as f:
-    f.write(f"CAPACITY_PROVIDER_ARN={capacity_provider['capacityProvider']['name']}\n")
     f.write(f"TASK_DEFINITION_ARN={task_definition['taskDefinition']['taskDefinitionArn']}\n")
-    f.write(f"CLUSTER_ARN={create_cluster['cluster']['clusterArn']}\n")
     f.write(f"SERVICE_ARN={create_service['service']['serviceArn']}\n")
