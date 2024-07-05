@@ -59,8 +59,8 @@ subnet2 = ec2.create_subnet(
     VpcId=vpc["Vpc"]["VpcId"]
 )
 
-rt.associate_with_subnet(SubnetId=subnet1["Subnet"]["SubnetId"])
-rt.associate_with_subnet(SubnetId=subnet2["Subnet"]["SubnetId"])
+ec2.associate_with_subnet(SubnetId=subnet1["Subnet"]["SubnetId"])
+ec2.associate_with_subnet(SubnetId=subnet2["Subnet"]["SubnetId"])
 
 # form the required Security Groups, Ingress Rules and Launch Templates
 sg = ec2.create_security_group(
