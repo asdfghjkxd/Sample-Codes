@@ -134,7 +134,7 @@ launch_template = ec2.create_launch_template(
 
 
 # create ASG client
-asg = boto3.resource("autoscaling", config=config)
+asg = boto3.client("autoscaling", config=config)
 
 # create launch template
 asg_group = asg.create_auto_scaling_group(
