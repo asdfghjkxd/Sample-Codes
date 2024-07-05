@@ -194,8 +194,13 @@ asg_group = asg.create_auto_scaling_group(
     ],
     VPCZoneIdentifier=f"{subnet1['Subnet']['SubnetId']},{subnet2['Subnet']['SubnetId']}",
 )
+
+group_details = asg.describe_auto_scaling_groups(
+    AutoScalingGroupNames=["ssg-wsg-asg"]
+)
+
 LOGGER.info(f"Auto scaling group created successfully! "
-            f"ASG ARN: {asg_group['AutoScalingGroups'][0]['AutoScalingGroupARN']}")
+            f"ASG ARN: {group_details['AutoScalingGroups'][0]['AutoScalingGroupARN']}")
 
 # create ecr repo
 ecr = boto3.client("ecr", config=config)
@@ -223,7 +228,7 @@ LOGGER.info("Writing environment variables to GitHub Actions environment file...
 with open(env_file, "a") as f:
     f.write(f"VPC_ID={vpc["Vpc"]["VpcId"]}\n")
     f.write(f"INTERNET_GATEWAY_ID={ig["InternetGateway"]["InternetGatewayId"]}\n")
-    f.write(f"ASG_ARN={asg_group["AutoScalingGroups"][0]["AutoScalingGroupARN"]}\n")
+    f.write(f"ASG_ARN={group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]}\n")
     f.write(f"SUBNET1_ID={subnet1["Subnet"]["SubnetId"]}\n")
     f.write(f"SUBNET2_ID={subnet2["Subnet"]["SubnetId"]}\n")
     f.write(f"SECURITY_GROUP_ID={sg['GroupId']}\n")
