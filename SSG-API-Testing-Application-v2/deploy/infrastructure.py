@@ -75,7 +75,6 @@ sg_ingress = ec2.authorize_security_group_ingress(
     CidrIp="0.0.0.0/32",
     FromPort=80,
     GroupId=sg["GroupId"],
-    GroupName=SG_GROUP_NAME,
     IpPermissions=[
         {
             "FromPort": 80,
