@@ -39,7 +39,7 @@ task_definition = ecs.register_task_definition(
             "portMappings": [
                 {
                     "containerPort": 8502,
-                    "hostPort": 80,
+                    "hostPort": 8502,
                     "protocol": "tcp",
                     "appProtocol": "http"
                 }
@@ -68,6 +68,7 @@ task_definition = ecs.register_task_definition(
 )
 LOGGER.info(f"Task definition created successfully! Task Definition ARN: {task_definition['taskDefinition']['taskDefinitionArn']}")
 
+LOGGER.info("Creating ECS service...")
 create_service = ecs.create_service(
     cluster=os.getenv("ECS_CLUSTER_ARN"),
     serviceName=os.getenv("ECS_SERVICE_NAME"),
@@ -91,12 +92,4 @@ create_service = ecs.create_service(
         "type": "ECS"
     },
 )
-
-
-# taken from
-# https://stackoverflow.com/questions/70123328/how-to-set-environment-variables-in-github-actions-using-python
-env_file = os.getenv("GITHUB_ENV")
-
-with open(env_file, "a") as f:
-    f.write(f"TASK_DEFINITION_ARN={task_definition['taskDefinition']['taskDefinitionArn']}\n")
-    f.write(f"SERVICE_ARN={create_service['service']['serviceArn']}\n")
+LOGGER.info(f"Service created successfully! Service ARN: {create_service['service']['serviceArn']}")

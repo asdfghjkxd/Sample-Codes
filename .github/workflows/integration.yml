@@ -13,7 +13,6 @@ env:
   PYTHON_VERSION: "3.12"
   ECR_REPO_NAME: "ssg-sample-application"
   AWS_REGION: "ap-southeast-1"
-  ECS_TASK_DEFINITION: "./revamped-application/deploy/task-definition.json"
   ECS_CONTAINER_NAME: "app"   # should be the same as containerDefinitions of task definition file
   ECS_CLUSTER_ARN: "arn:aws:ecs:ap-southeast-1:730335480348:cluster/ssg-ecs-app"
   SG_GROUP_NAME: "ssg-wsg-sg"
