@@ -278,6 +278,7 @@ class Infrastructure:
         else:
             Infrastructure.LOGGER.warning("Subnet 1 already exists! Skipping creation...")
             # safe as we have ascertained that the subnet exists with the check above
+            Infrastructure.LOGGER.info(subnets)
             self.subnet_id_1 = (
                 list(map(lambda y: y["SubnetId"], filter(lambda x: x["CidrBlock"] == SUBNET_CIDR_ONE, subnets)))[0])
 
