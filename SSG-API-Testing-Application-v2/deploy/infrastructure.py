@@ -324,28 +324,14 @@ class Infrastructure:
             ]
         )
 
-        # guaranteed to have at least 1 routing table since it was created or that it already exists in
-        # self._create_or_reuse_routing_table()
-        Infrastructure.LOGGER.info(routes)
-        associations = map(lambda x: x["SubnetId"], routes["RouteTables"][0]["Associations"])
+        Infrastructure.LOGGER.info("Associating routing table with Subnet 1...")
+        self.table.associate_with_subnet(SubnetId=self.subnet_id_1)
 
-        if self.subnet_id_1 not in associations:
-            Infrastructure.LOGGER.info("Associating routing table with Subnet 1...")
-            self.table.associate_with_subnet(SubnetId=self.subnet_id_1)
-        else:
-            Infrastructure.LOGGER.warning("Routing table already associated with Subnet 1! Skipping...")
+        Infrastructure.LOGGER.info("Associating routing table with Subnet 2...")
+        self.table.associate_with_subnet(SubnetId=self.subnet_id_2)
 
-        if self.subnet_id_2 not in associations:
-            Infrastructure.LOGGER.info("Associating routing table with Subnet 2...")
-            self.table.associate_with_subnet(SubnetId=self.subnet_id_2)
-        else:
-            Infrastructure.LOGGER.warning("Routing table already associated with Subnet 2! Skipping...")
-
-        if self.subnet_id_3 not in associations:
-            Infrastructure.LOGGER.info("Associating routing table with Subnet 3...")
-            self.table.associate_with_subnet(SubnetId=self.subnet_id_3)
-        else:
-            Infrastructure.LOGGER.warning("Routing table already associated with Subnet 3! Skipping...")
+        Infrastructure.LOGGER.info("Associating routing table with Subnet 3...")
+        self.table.associate_with_subnet(SubnetId=self.subnet_id_3)
 
     def _create_or_reuse_security_groups(self):
         # check if the required SG already exists, and if so, retrieve it
