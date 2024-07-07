@@ -25,7 +25,7 @@ class Infrastructure:
     LOGGER = logging.getLogger("infrastructure-provisioning")
 
     # set up stream handler with correct logging level and format
-    FORMATTER = logging.Formatter("%(asctime)s - %(name)s - %(levelname)-9s - %(message)s")
+    FORMATTER = logging.Formatter("%(asctime)s - %(levelname)-8s - %(message)s")
     STREAM_HANDLER = logging.StreamHandler()
     STREAM_HANDLER.setLevel(logging.INFO)
     STREAM_HANDLER.setFormatter(FORMATTER)
@@ -228,8 +228,7 @@ class Infrastructure:
 
             if not any(map(lambda x: (
                     x["DestinationCidrBlock"] == "0.0.0.0/0"
-                    and x["GatewayId"] == self.igw_id
-                    and x["RouteTableId"] == self.rt_id), routes)):
+                    and x["GatewayId"] == self.igw_id), routes)):
                 Infrastructure.LOGGER.warning("Missing route to internet gateway! Creating route...")
                 self.ec2.create_route(
                     DestinationCidrBlock="0.0.0.0/0",
