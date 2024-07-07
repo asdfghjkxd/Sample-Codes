@@ -312,7 +312,7 @@ class Infrastructure:
             )
 
     def _associate_subnets_with_routing_table(self):
-        self.table = boto3.resource("ec2").RouteTable(self.rt_id)
+        self.table = boto3.resource("ec2", config=Infrastructure.CONFIG).RouteTable(self.rt_id)
 
         routes = self.ec2.describe_route_tables(
             Filters=[
