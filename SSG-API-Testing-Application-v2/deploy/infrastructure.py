@@ -452,8 +452,24 @@ class Infrastructure:
             Infrastructure.LOGGER.info("Security group ingress rules authorized successfully!")
 
     def _create_or_reuse_launch_template(self):
-        try:
-            Infrastructure.LOGGER.info("Attempting to create launch template...")
+        lts = self.ec2.describe_launch_templates(
+            Filters=[
+                {
+                    "Name": "launch-template-name",
+                    "Values": [
+                        ECS_LAUNCH_TEMPLATE_NAME
+                    ]
+                }
+            ]
+        )
+
+        if len(lts["LaunchTemplates"]) > 0:
+            Infrastructure.LOGGER.warning(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
+                                          f"Reusing existing launch template...")
+            self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
+        else:
+            # launch template is not found
+            Infrastructure.LOGGER.info("Creating launch template...")
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
                 LaunchTemplateData={
@@ -487,18 +503,7 @@ class Infrastructure:
             self.ecs_launch_template_id = launch_template["LaunchTemplate"]["LaunchTemplateId"]
             Infrastructure.LOGGER.info(
                 f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
-        except ClientError:
-            # launch template is already found
-            Infrastructure.LOGGER.error(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
-                                          f"Reusing existing launch template...")
-            lts = self.ec2.describe_launch_templates(
-                LaunchTemplateNames=[
-                    ECS_LAUNCH_TEMPLATE_NAME
-                ]
-            )
-
-            self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
-
+            
     def _create_or_reuse_auto_scaling_group(self):
         try:
             asgs = self.asg.describe_auto_scaling_groups(
