@@ -51,14 +51,14 @@ class Infrastructure:
         self.asg_arn: str = None
         self.ecs_cluster_arn: str = None
         self.ecs_launch_template_id: str = None
-        
+
         # define clients and resources
         self.table = None  # type: boto3.resource("ec2").RouteTable
         self.ec2 = boto3.client("ec2", config=Infrastructure.CONFIG)
         self.asg = boto3.client("autoscaling", config=Infrastructure.CONFIG)
         self.ecr = boto3.client("ecr", config=Infrastructure.CONFIG)
         self.ecs = boto3.client("ecs", config=Infrastructure.CONFIG)
-        
+
         # call setup methods and export exportable variables to env file if it exists
         self._setup()
         self._export_to_env()
@@ -66,7 +66,7 @@ class Infrastructure:
 
     def _setup(self):
         """Calls the setup methods in the correct order to provision the infrastructure."""
-        
+
         self._create_or_reuse_vpc()
         self._enable_public_dns()
         self._create_or_reuse_internet_gateway()
@@ -82,11 +82,11 @@ class Infrastructure:
 
     def _export_to_env(self):
         Infrastructure.LOGGER.info("Writing environment variables to GitHub Actions environment file...")
-        
+
         # taken from
         # https://stackoverflow.com/questions/70123328/how-to-set-environment-variables-in-github-actions-using-python
         env_file = os.getenv("GITHUB_ENV")
-        
+
         if env_file is None:
             os.putenv("VPC_ID", self.vpc_id)
             os.putenv("IGW_ID", self.igw_id)
@@ -98,7 +98,7 @@ class Infrastructure:
             os.putenv("ASG_ARN", self.asg_arn)
             os.putenv("ECS_CLUSTER_ARN", self.ecs_cluster_arn)
             os.putenv("ECS_LAUNCH_TEMPLATE_ID", self.ecs_launch_template_id)
-        
+
         with open(env_file, "a") as f:
             f.write(f"VPC_ID={self.vpc_id}\n")
             f.write(f"IGW_ID={self.igw_id}\n")
@@ -125,7 +125,6 @@ class Infrastructure:
         tabulated.add_row(["Auto-Scaling Group ARN", self.asg_arn])
         tabulated.add_row(["ECS Cluster ARN", self.ecs_cluster_arn])
         tabulated.add_row(["ECS Launch Template ID", self.ecs_launch_template_id])
-
 
         Infrastructure.LOGGER.info(
             f"""
@@ -278,7 +277,6 @@ class Infrastructure:
         else:
             Infrastructure.LOGGER.warning("Subnet 1 already exists! Skipping creation...")
             # safe as we have ascertained that the subnet exists with the check above
-            Infrastructure.LOGGER.info(subnets)
             self.subnet_id_1 = (
                 list(map(lambda y: y["SubnetId"], filter(lambda x: x["CidrBlock"] == SUBNET_CIDR_ONE, subnets)))[0])
 
@@ -328,6 +326,7 @@ class Infrastructure:
 
         # guaranteed to have at least 1 routing table since it was created or that it already exists in
         # self._create_or_reuse_routing_table()
+        Infrastructure.LOGGER.info(routes)
         associations = map(lambda x: x["SubnetId"], routes["RouteTables"][0]["Associations"])
 
         if self.subnet_id_1 not in associations:
@@ -374,12 +373,12 @@ class Infrastructure:
             ip_perms = sgs["SecurityGroups"][0]["IpPermissions"]
 
             if not (
-                any(map(lambda x: (
-                    x["FromPort"] == 80
-                    and x["ToPort"] == CONTAINER_APPLICATION_PORT
-                    and (len(x["IpRanges"]) > 0 and x["IpRanges"][0]["CidrIp"] == "0.0.0.0/0")
-                ), ip_perms))
-                and any(map(lambda x: (
+                    any(map(lambda x: (
+                            x["FromPort"] == 80
+                            and x["ToPort"] == CONTAINER_APPLICATION_PORT
+                            and (len(x["IpRanges"]) > 0 and x["IpRanges"][0]["CidrIp"] == "0.0.0.0/0")
+                    ), ip_perms))
+                    and any(map(lambda x: (
                     x["FromPort"] == 433
                     and x["ToPort"] == CONTAINER_APPLICATION_PORT
                     and (len(x["IpRanges"]) > 0 and x["IpRanges"][0]["CidrIp"] == "0.0.0.0/0")), ip_perms))
@@ -475,7 +474,7 @@ class Infrastructure:
 
         if len(lts["LaunchTemplates"]) > 0:
             Infrastructure.LOGGER.warning(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
-                           f"Reusing existing launch template...")
+                                          f"Reusing existing launch template...")
             self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
         else:
             Infrastructure.LOGGER.info("Creating launch template...")
@@ -510,8 +509,9 @@ class Infrastructure:
                 }
             )
             self.ecs_launch_template_id = launch_template["LaunchTemplate"]["LaunchTemplateId"]
-            Infrastructure.LOGGER.info(f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
-            
+            Infrastructure.LOGGER.info(
+                f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
+
     def _create_or_reuse_auto_scaling_group(self):
         asgs = self.asg.describe_auto_scaling_groups(
             AutoScalingGroupNames=[
@@ -521,7 +521,7 @@ class Infrastructure:
 
         if len(asgs["AutoScalingGroups"]) > 0:
             Infrastructure.LOGGER.warning(f"Auto scaling group with name {ECS_ASG_NAME} already exists! "
-                           f"Reusing existing auto scaling group...")
+                                          f"Reusing existing auto scaling group...")
             self.asg_arn = asgs["AutoScalingGroups"][0]["AutoScalingGroupARN"]
         else:
             Infrastructure.LOGGER.info("Creating auto scaling group...")
@@ -544,7 +544,7 @@ class Infrastructure:
             self.asg_arn = group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]
 
             Infrastructure.LOGGER.info(f"Auto scaling group created successfully! ASG ARN: {self.asg_arn}")
-    
+
     def _create_or_reuse_ecr_repo(self):
         repos = self.ecr.describe_repositories(
             repositoryNames=[
@@ -553,7 +553,8 @@ class Infrastructure:
         )
 
         if len(repos["repositories"]) > 0:
-            Infrastructure.LOGGER.warning(f"ECR repository with name {ECR_REPO_NAME} already exists! Reusing existing repository...")
+            Infrastructure.LOGGER.warning(
+                f"ECR repository with name {ECR_REPO_NAME} already exists! Reusing existing repository...")
         else:
             Infrastructure.LOGGER.info("Creating ECR repository...")
             registry = self.ecr.describe_registry()
@@ -561,11 +562,12 @@ class Infrastructure:
                 repositoryName=ECR_REPO_NAME,
                 registryId=registry["registryId"]
             )
-            Infrastructure.LOGGER.info(f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
-    
+            Infrastructure.LOGGER.info(
+                f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
+
     def _create_or_reuse_capacity_provider(self):
         Infrastructure.LOGGER.info("Creating capacity provider...")
-        
+
         cap_provs = self.ecs.describe_capacity_providers(
             capacityProviders=[
                 ECS_CAPACITY_PROVIDER_NAME
@@ -574,7 +576,7 @@ class Infrastructure:
 
         if len(cap_provs["capacityProviders"]) > 0:
             Infrastructure.LOGGER.warning(f"Capacity provider with name {ECS_CAPACITY_PROVIDER_NAME} already exists! "
-                           f"Reusing existing capacity provider...")
+                                          f"Reusing existing capacity provider...")
         else:
             self.ecs.create_capacity_provider(
                 name=ECS_CAPACITY_PROVIDER_NAME,
@@ -582,9 +584,9 @@ class Infrastructure:
                     "autoScalingGroupArn": self.asg_arn,
                 }
             )
-            
+
             Infrastructure.LOGGER.info("Capacity provider created successfully!")
-        
+
     def _create_or_reuse_ecs_cluster(self):
         clusters = self.ecs.describe_clusters(
             clusters=[
@@ -594,7 +596,8 @@ class Infrastructure:
 
         if len(clusters["clusters"]) > 0:
             # reuse cluster
-            Infrastructure.LOGGER.warning(f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
+            Infrastructure.LOGGER.warning(
+                f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
             self.ecs_cluster_arn = clusters["clusters"][0]["clusterArn"]
         else:
             # create cluster to use instead of reusing default cluster
@@ -606,7 +609,8 @@ class Infrastructure:
                 ]
             )
             self.ecs_cluster_arn = create_cluster["cluster"]["clusterArn"]
-            Infrastructure.LOGGER.info(f"ECS cluster created successfully! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
+            Infrastructure.LOGGER.info(
+                f"ECS cluster created successfully! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
 
 
 if __name__ == '__main__':
