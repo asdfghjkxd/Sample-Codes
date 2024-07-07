@@ -453,17 +453,6 @@ class Infrastructure:
 
     def _create_or_reuse_launch_template(self):
         try:
-            lts = self.ec2.describe_launch_templates(
-                LaunchTemplateNames=[
-                    ECS_LAUNCH_TEMPLATE_NAME
-                ]
-            )
-
-            Infrastructure.LOGGER.warning(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
-                                          f"Reusing existing launch template...")
-            self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
-        except ClientError:
-            # launch template is not found
             Infrastructure.LOGGER.info("Creating launch template...")
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName="ssg-wsg-app-launch-template",
@@ -490,14 +479,25 @@ class Infrastructure:
                         self.sg_id
                     ],
                     "UserData": f"""
-                                #!/bin/bash
-                                echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
-                                """
+                                            #!/bin/bash
+                                            echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
+                                            """
                 }
             )
             self.ecs_launch_template_id = launch_template["LaunchTemplate"]["LaunchTemplateId"]
             Infrastructure.LOGGER.info(
                 f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
+        except ClientError:
+            # launch template is already found
+            Infrastructure.LOGGER.warning(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
+                                          f"Reusing existing launch template...")
+            lts = self.ec2.describe_launch_templates(
+                LaunchTemplateNames=[
+                    ECS_LAUNCH_TEMPLATE_NAME
+                ]
+            )
+
+            self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
 
     def _create_or_reuse_auto_scaling_group(self):
         try:
