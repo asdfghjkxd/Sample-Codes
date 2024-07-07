@@ -8,6 +8,7 @@ import os
 import boto3
 import logging
 
+from botocore.exceptions import ClientError
 from prettytable import PrettyTable
 
 from constants import (CIDR_BLOCK, SUBNET_CIDR_ONE, SUBNET_CIDR_TWO, SUBNET_CIDR_THREE, ECS_CLUSTER_NAME, ECS_IMAGE_AMI,
@@ -404,7 +405,6 @@ class Infrastructure:
                     ]
                 )
                 Infrastructure.LOGGER.info("Security group ingress rules authorized successfully!")
-
         else:
             Infrastructure.LOGGER.info("Creating security group...")
             sg = self.ec2.create_security_group(
@@ -452,17 +452,18 @@ class Infrastructure:
             Infrastructure.LOGGER.info("Security group ingress rules authorized successfully!")
 
     def _create_or_reuse_launch_template(self):
-        lts = self.ec2.describe_launch_templates(
-            LaunchTemplateNames=[
-                ECS_LAUNCH_TEMPLATE_NAME
-            ]
-        )
+        try:
+            lts = self.ec2.describe_launch_templates(
+                LaunchTemplateNames=[
+                    ECS_LAUNCH_TEMPLATE_NAME
+                ]
+            )
 
-        if len(lts["LaunchTemplates"]) > 0:
             Infrastructure.LOGGER.warning(f"Launch template with name {ECS_LAUNCH_TEMPLATE_NAME} already exists! "
                                           f"Reusing existing launch template...")
             self.ecs_launch_template_id = lts["LaunchTemplates"][0]["LaunchTemplateId"]
-        else:
+        except ClientError:
+            # launch template is not found
             Infrastructure.LOGGER.info("Creating launch template...")
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName="ssg-wsg-app-launch-template",
@@ -489,9 +490,9 @@ class Infrastructure:
                         self.sg_id
                     ],
                     "UserData": f"""
-                    #!/bin/bash
-                    echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
-                    """
+                                #!/bin/bash
+                                echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
+                                """
                 }
             )
             self.ecs_launch_template_id = launch_template["LaunchTemplate"]["LaunchTemplateId"]
@@ -499,19 +500,19 @@ class Infrastructure:
                 f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
 
     def _create_or_reuse_auto_scaling_group(self):
-        asgs = self.asg.describe_auto_scaling_groups(
-            AutoScalingGroupNames=[
-                ECS_ASG_NAME
-            ]
-        )
+        try:
+            asgs = self.asg.describe_auto_scaling_groups(
+                AutoScalingGroupNames=[
+                    ECS_ASG_NAME
+                ]
+            )
 
-        if len(asgs["AutoScalingGroups"]) > 0:
             Infrastructure.LOGGER.warning(f"Auto scaling group with name {ECS_ASG_NAME} already exists! "
                                           f"Reusing existing auto scaling group...")
             self.asg_arn = asgs["AutoScalingGroups"][0]["AutoScalingGroupARN"]
-        else:
+        except ClientError:
             Infrastructure.LOGGER.info("Creating auto scaling group...")
-            asg_group = self.asg.create_auto_scaling_group(
+            self.asg.create_auto_scaling_group(
                 AutoScalingGroupName="ssg-wsg-asg",
                 LaunchTemplate={
                     "LaunchTemplateId": self.ecs_launch_template_id,
@@ -532,16 +533,16 @@ class Infrastructure:
             Infrastructure.LOGGER.info(f"Auto scaling group created successfully! ASG ARN: {self.asg_arn}")
 
     def _create_or_reuse_ecr_repo(self):
-        repos = self.ecr.describe_repositories(
-            repositoryNames=[
-                os.getenv("ECR_REPO_NAME")
-            ]
-        )
+        try:
+            repos = self.ecr.describe_repositories(
+                repositoryNames=[
+                    os.getenv("ECR_REPO_NAME")
+                ]
+            )
 
-        if len(repos["repositories"]) > 0:
             Infrastructure.LOGGER.warning(
                 f"ECR repository with name {ECR_REPO_NAME} already exists! Reusing existing repository...")
-        else:
+        except ClientError:
             Infrastructure.LOGGER.info("Creating ECR repository...")
             registry = self.ecr.describe_registry()
             repo = self.ecr.create_repository(
@@ -552,18 +553,19 @@ class Infrastructure:
                 f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
 
     def _create_or_reuse_capacity_provider(self):
-        Infrastructure.LOGGER.info("Creating capacity provider...")
 
-        cap_provs = self.ecs.describe_capacity_providers(
-            capacityProviders=[
-                ECS_CAPACITY_PROVIDER_NAME
-            ]
-        )
 
-        if len(cap_provs["capacityProviders"]) > 0:
+        try:
+            cap_provs = self.ecs.describe_capacity_providers(
+                capacityProviders=[
+                    ECS_CAPACITY_PROVIDER_NAME
+                ]
+            )
+
             Infrastructure.LOGGER.warning(f"Capacity provider with name {ECS_CAPACITY_PROVIDER_NAME} already exists! "
                                           f"Reusing existing capacity provider...")
-        else:
+        except ClientError:
+            Infrastructure.LOGGER.info("Creating capacity provider...")
             self.ecs.create_capacity_provider(
                 name=ECS_CAPACITY_PROVIDER_NAME,
                 autoScalingGroupProvider={
@@ -574,18 +576,18 @@ class Infrastructure:
             Infrastructure.LOGGER.info("Capacity provider created successfully!")
 
     def _create_or_reuse_ecs_cluster(self):
-        clusters = self.ecs.describe_clusters(
-            clusters=[
-                ECS_CLUSTER_NAME
-            ]
-        )
+        try:
+            clusters = self.ecs.describe_clusters(
+                clusters=[
+                    ECS_CLUSTER_NAME
+                ]
+            )
 
-        if len(clusters["clusters"]) > 0:
             # reuse cluster
             Infrastructure.LOGGER.warning(
                 f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
             self.ecs_cluster_arn = clusters["clusters"][0]["clusterArn"]
-        else:
+        except ClientError:
             # create cluster to use instead of reusing default cluster
             Infrastructure.LOGGER.info("Creating ECS cluster...")
             create_cluster = self.ecs.create_cluster(
