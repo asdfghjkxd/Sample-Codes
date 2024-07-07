@@ -3,7 +3,7 @@ IaC template for creating base cloud environment
 
 Inspired from https://aws.plainenglish.io/creating-vpc-using-boto3-terraform-cloudformation-and-both-af741a8afb3c
 """
-
+import base64
 import os
 import boto3
 import logging
@@ -470,6 +470,8 @@ class Infrastructure:
         else:
             # launch template is not found
             Infrastructure.LOGGER.info("Creating launch template...")
+            user_data =
+
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
                 LaunchTemplateData={
@@ -494,16 +496,17 @@ class Infrastructure:
                     "SecurityGroupIds": [
                         self.sg_id
                     ],
-                    "UserData": f"""
-                                #!/bin/bash
-                                echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
-                                """
+                    "UserData": base64.b64encode(f"""
+                                                 #!/bin/bash
+                                                 echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
+                                                 """.encode("utf-8"))
                 }
             )
+
             self.ecs_launch_template_id = launch_template["LaunchTemplate"]["LaunchTemplateId"]
             Infrastructure.LOGGER.info(
                 f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
-            
+
     def _create_or_reuse_auto_scaling_group(self):
         try:
             asgs = self.asg.describe_auto_scaling_groups(
