@@ -496,9 +496,9 @@ class Infrastructure:
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
                 LaunchTemplateData={
-                    "IamInstanceProfile": {
-                        "Arn": self.instance_profile_arn
-                    },
+                    # "IamInstanceProfile": {
+                    #     "Arn": self.instance_profile_arn
+                    # },
                     "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
