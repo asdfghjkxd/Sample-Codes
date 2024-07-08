@@ -594,8 +594,30 @@ class Infrastructure:
             )
 
             Infrastructure.LOGGER.warning(f"Capacity provider with name {ECS_CAPACITY_PROVIDER_NAME} already exists! "
-                                          f"Reusing existing capacity provider...")
+                                          f"Checking to ensure that it is active...")
+
+            if any(map(lambda x: x["status"] != "ACTIVE", self.ecs.describe_capacity_providers(
+                capacityProviders=[
+                    ECS_CAPACITY_PROVIDER_NAME
+                ])["capacityProviders"])):
+                Infrastructure.LOGGER.warning("Capacity provider is inactive! Deleting capacity provider and "
+                                              "attempting to re-create it...")
+                self.ecs.delete_capacity_provider(
+                    capacityProvider=ECS_CAPACITY_PROVIDER_NAME
+                )
+                Infrastructure.LOGGER.info("Capacity provider deleted!")
+
+                self.ecs.create_capacity_provider(
+                    name=ECS_CAPACITY_PROVIDER_NAME,
+                    autoScalingGroupProvider={
+                        "autoScalingGroupArn": self.asg_arn,
+                    }
+                )
+                Infrastructure.LOGGER.info("Capacity provider recreated successfully!")
+            else:
+                Infrastructure.LOGGER.warning("Capacity provider is active! Reusing existing capacity provider...")
         except ClientError:
+            # errors out as the capacity provider name does not exist and has failed to describe the capacity provider
             Infrastructure.LOGGER.info("Creating capacity provider...")
             self.ecs.create_capacity_provider(
                 name=ECS_CAPACITY_PROVIDER_NAME,
@@ -618,10 +640,27 @@ class Infrastructure:
             Infrastructure.LOGGER.warning(
                 f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Checking to ensure that it is active...")
 
-            print(clusters)
-            self.ecs_cluster_arn = clusters["clusters"][0]["clusterArn"]
+            if any(map(lambda x: x["status"] != "ACTIVE", clusters["clusters"])):
+                Infrastructure.LOGGER.warning("Cluster is inactive! Deleting cluster and attempting to re-create it...")
+                self.ecs.delete_cluster(
+                    cluster=ECS_CLUSTER_NAME
+                )
+                Infrastructure.LOGGER.info("Cluster deleted!")
+
+                create_cluster = self.ecs.create_cluster(
+                    clusterName=ECS_CLUSTER_NAME,
+                    capacityProviders=[
+                        ECS_CAPACITY_PROVIDER_NAME
+                    ]
+                )
+                self.ecs_cluster_arn = create_cluster["cluster"]["clusterArn"]
+                Infrastructure.LOGGER.info(f"Cluster recreated! Cluster ARN: {create_cluster['cluster']['clusterArn']}")
+            else:
+                active = list(filter(lambda x: x["status"] == "ACTIVE", clusters["clusters"]))[0]
+                Infrastructure.LOGGER.warning("Cluster is active! Reusing existing cluster...")
+                self.ecs_cluster_arn = active["clusterArn"]
         except ClientError:
-            # create cluster to use instead of reusing default cluster
+            # cluster must be missing as it is failing to describe it
             Infrastructure.LOGGER.info("Creating ECS cluster...")
             create_cluster = self.ecs.create_cluster(
                 clusterName=ECS_CLUSTER_NAME,

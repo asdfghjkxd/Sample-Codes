@@ -96,7 +96,6 @@ class ECS:
         tabulated = PrettyTable(field_names=["Variable", "Value"])
         tabulated.add_row(["ECS Task Definition ARN", self.ecs_task_definition_arn])
 
-
         print(tabulated)
 
     def _create_task_definition(self):
@@ -152,8 +151,6 @@ class ECS:
                 ECS_SERVICE_NAME
             ]
         )
-
-        print(svcs)
 
         if len(svcs["services"]) > 0:
             # service exists, so we update it instead
