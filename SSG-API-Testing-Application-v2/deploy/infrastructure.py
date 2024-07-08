@@ -101,6 +101,7 @@ class Infrastructure:
             os.putenv("SUBNET_ID_1", self.subnet_id_1)
             os.putenv("SUBNET_ID_2", self.subnet_id_2)
             os.putenv("SUBNET_ID_3", self.subnet_id_3)
+            os.putenv("INSTANCE_PROFILE_ARN", self.instance_profile_arn)
             os.putenv("SECURITY_GROUP_ID", self.sg_id)
             os.putenv("ASG_ARN", self.asg_arn)
             os.putenv("ECS_CLUSTER_ARN", self.ecs_cluster_arn)
@@ -113,6 +114,7 @@ class Infrastructure:
             f.write(f"SUBNET_ID_1={self.subnet_id_1}\n")
             f.write(f"SUBNET_ID_2={self.subnet_id_2}\n")
             f.write(f"SUBNET_ID_3={self.subnet_id_3}\n")
+            f.write(f"INSTANCE_PROFILE_ARN={self.instance_profile_arn}\n")
             f.write(f"SECURITY_GROUP_ID={self.sg_id}\n")
             f.write(f"ASG_ARN={self.asg_arn}\n")
             f.write(f"ECS_CLUSTER_ARN={self.ecs_cluster_arn}\n")
@@ -128,6 +130,7 @@ class Infrastructure:
         tabulated.add_row(["Subnet 1 ID", self.subnet_id_1])
         tabulated.add_row(["Subnet 2 ID", self.subnet_id_2])
         tabulated.add_row(["Subnet 3 ID", self.subnet_id_3])
+        tabulated.add_row(["Instance Profile ARN", self.instance_profile_arn])
         tabulated.add_row(["Security Group ID", self.sg_id])
         tabulated.add_row(["Auto-Scaling Group ARN", self.asg_arn])
         tabulated.add_row(["ECS Cluster ARN", self.ecs_cluster_arn])
@@ -455,6 +458,7 @@ class Infrastructure:
             self.iam.get_role(RoleName="AmazonEC2ContainerServiceforEC2Role")
             Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
         except self.iam.exceptions.NoSuchEntityException:
+            Infrastructure.LOGGER.info("Creating Role...")
             role_policy = {
                 "Version": "2012-10-17",
                 "Statement": [
@@ -482,6 +486,7 @@ class Infrastructure:
             self.instance_profile_arn = self.iam.get_instance_profile(
                 InstanceProfileName=INSTANCE_PROFILE_NAME
             )["InstanceProfile"]["Arn"]
+            Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
         except Exception:
             Infrastructure.LOGGER.info("Creating instance profile...")
             instance_profile = self.iam.create_instance_profile(
@@ -548,7 +553,7 @@ class Infrastructure:
                     "UserData": base64.b64encode(
                         ("#!/bin/bash\n"
                          "cat <<'EOF' >> /etc/ecs/ecs.config\n"
-                         "ECS_CLUSTER=your_cluster_name\n"
+                         f"ECS_CLUSTER={ECS_CLUSTER_NAME}\n"
                          "ECS_CONTAINER_INSTANCE_TAGS={'Name': '" + ECS_ASG_NAME + "'}\n"
                          "EOF").encode("utf-8")).decode("utf-8")
                 }
