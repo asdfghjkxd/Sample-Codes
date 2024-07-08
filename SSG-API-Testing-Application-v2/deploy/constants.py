@@ -28,6 +28,7 @@ def load():
     env_file = os.getenv("GITHUB_ENV")
 
     if env_file is None:
+        os.putenv("AWS_REGION", AWS_REGION)
         os.putenv("CIDR_BLOCK", CIDR_BLOCK)
         os.putenv("SUBNET_CIDR_ONE", SUBNET_CIDR_ONE)
         os.putenv("SUBNET_CIDR_TWO", SUBNET_CIDR_TWO)
@@ -47,6 +48,7 @@ def load():
         os.putenv("ECS_CONTAINER_NAME", ECS_CONTAINER_NAME)
 
     with open(env_file, "a") as f:
+        f.write(f"AWS_REGION={AWS_REGION}\n")
         f.write(f"CIDR_BLOCK={CIDR_BLOCK}\n")
         f.write(f"SUBNET_CIDR_ONE={SUBNET_CIDR_ONE}\n")
         f.write(f"SUBNET_CIDR_TWO={SUBNET_CIDR_TWO}\n")
