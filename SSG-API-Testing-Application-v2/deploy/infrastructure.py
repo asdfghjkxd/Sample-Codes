@@ -618,7 +618,8 @@ class Infrastructure:
             Infrastructure.LOGGER.warning(
                 f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
             self.ecs_cluster_arn = clusters["clusters"][-1]["clusterArn"]
-        except ClientError:
+        except ClientError as ex:
+            print(ex)
             # create cluster to use instead of reusing default cluster
             Infrastructure.LOGGER.info("Creating ECS cluster...")
             create_cluster = self.ecs.create_cluster(
