@@ -498,7 +498,7 @@ class Infrastructure:
                     "UserData": base64.b64encode(f"""
                                                  #!/bin/bash
                                                  echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
-                                                 """.encode("utf-8"))
+                                                 """.encode("utf-8")).decode("utf-8")
                 }
             )
 
