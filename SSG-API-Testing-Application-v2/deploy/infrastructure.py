@@ -456,7 +456,7 @@ class Infrastructure:
     def _setup_role(self):
         try:
             self.iam.get_role(RoleName="AmazonEC2ContainerServiceforEC2Role")
-            Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
+            Infrastructure.LOGGER.warning("Instance profile role already exists! Skipping creation...")
         except self.iam.exceptions.NoSuchEntityException:
             Infrastructure.LOGGER.info("Creating Role...")
             role_policy = {
@@ -603,7 +603,7 @@ class Infrastructure:
                         "ResourceType": "auto-scaling-group",
                         "Key": "Name",
                         "Value": ECS_ASG_NAME,
-                        "PropagateAtLaunch": False
+                        "PropagateAtLaunch": True
                     }
                 ]
             )
