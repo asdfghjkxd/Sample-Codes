@@ -578,7 +578,20 @@ class Infrastructure:
                 time.sleep(10)
 
             group_details = self.asg.describe_auto_scaling_groups(
-                AutoScalingGroupNames=[ECS_ASG_NAME]
+                Filters=[
+                    {
+                        "Name": "tag-key",
+                        "Values": [
+                            "Name"
+                        ]
+                    },
+                    {
+                        "Name": "tag-value",
+                        "Values": [
+                            ECS_ASG_NAME
+                        ]
+                    }
+                ]
             )
             self.asg_arn = group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]
             Infrastructure.LOGGER.info(f"Auto scaling group created successfully! ASG ARN: {self.asg_arn}")
