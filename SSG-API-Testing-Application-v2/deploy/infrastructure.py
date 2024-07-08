@@ -130,12 +130,10 @@ class Infrastructure:
         tabulated.add_row(["ECS Launch Template ID", self.ecs_launch_template_id])
 
         Infrastructure.LOGGER.info(
-            f"""
-            ################################################################################
-            #                           Relevant Setup Information                         #
-            ################################################################################
-            {tabulated}
-            """
+            f"################################################################################\n"
+            f"#                           Relevant Setup Information                         #\n"
+            f"################################################################################\n"
+            f"{tabulated}"
         )
 
     def _create_or_reuse_vpc(self):
@@ -555,7 +553,22 @@ class Infrastructure:
 
             elapsed_time = 0
             while len(
-                    self.asg.describe_auto_scaling_groups(AutoScalingGroupNames=[ECS_ASG_NAME])
+                    self.asg.describe_auto_scaling_groups(
+                        Filters=[
+                            {
+                                "Name": "tag-key",
+                                "Values": [
+                                    "Name"
+                                ]
+                            },
+                            {
+                                "Name": "tag-value",
+                                "Values": [
+                                    ECS_ASG_NAME
+                                ]
+                            }
+                        ]
+                    )
                     ["AutoScalingGroups"]) == 0:
                 # wait for the ASG to launch
                 Infrastructure.LOGGER.info(f"Waiting for auto scaling group to launch instances... "
@@ -591,8 +604,6 @@ class Infrastructure:
                 f"ECR repository created successfully! Repository URI: {repo['repository']['repositoryUri']}")
 
     def _create_or_reuse_capacity_provider(self):
-
-
         try:
             cap_provs = self.ecs.describe_capacity_providers(
                 capacityProviders=[
