@@ -275,6 +275,12 @@ class Infrastructure:
                 CidrBlock=SUBNET_CIDR_ONE,
                 VpcId=self.vpc_id
             )
+            self.ec2.modify_subnet_attribute(
+                MapPublicIpOnLaunch={
+                    'Value': True
+                },
+                SubnetId=subnet1["Subnet"]["SubnetId"]
+            )
             self.subnet_id_1 = subnet1["Subnet"]["SubnetId"]
             Infrastructure.LOGGER.info(f"Subnet 1 created successfully! Subnet ID: {self.subnet_id_1}")
         else:
@@ -288,6 +294,12 @@ class Infrastructure:
                 AvailabilityZone="ap-southeast-1b",
                 CidrBlock=SUBNET_CIDR_TWO,
                 VpcId=self.vpc_id
+            )
+            self.ec2.modify_subnet_attribute(
+                MapPublicIpOnLaunch={
+                    'Value': True
+                },
+                SubnetId=subnet2["Subnet"]["SubnetId"]
             )
             self.subnet_id_2 = subnet2["Subnet"]["SubnetId"]
             Infrastructure.LOGGER.info(f"Subnet 2 created successfully! Subnet ID: {self.subnet_id_2}")
@@ -303,6 +315,12 @@ class Infrastructure:
                 AvailabilityZone="ap-southeast-1c",
                 CidrBlock=SUBNET_CIDR_THREE,
                 VpcId=self.vpc_id
+            )
+            self.ec2.modify_subnet_attribute(
+                MapPublicIpOnLaunch={
+                    'Value': True
+                },
+                SubnetId=subnet3["Subnet"]["SubnetId"]
             )
             self.subnet_id_3 = subnet3["Subnet"]["SubnetId"]
             Infrastructure.LOGGER.info(f"Subnet 3 created successfully! Subnet ID: {self.subnet_id_3}")
@@ -551,11 +569,8 @@ class Infrastructure:
                         self.sg_id
                     ],
                     "UserData": base64.b64encode(
-                        ("#!/bin/bash\n"
-                         "cat <<'EOF' >> /etc/ecs/ecs.config\n"
-                         f"ECS_CLUSTER={ECS_CLUSTER_NAME}\n"
-                         "ECS_CONTAINER_INSTANCE_TAGS={'Name': '" + ECS_ASG_NAME + "'}\n"
-                         "EOF").encode("utf-8")).decode("utf-8")
+                        f"#!/bin/bash\necho ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config".encode()
+                    ).decode('utf-8'),
                 }
             )
 
