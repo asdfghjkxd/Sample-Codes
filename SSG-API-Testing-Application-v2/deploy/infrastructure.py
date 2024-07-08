@@ -553,22 +553,20 @@ class Infrastructure:
                 ]
             )
 
-            group_details = self.asg.describe_auto_scaling_groups(
-                AutoScalingGroupNames=[ECS_ASG_NAME]
-            )
             elapsed_time = 0
-
-            while len(group_details["AutoScalingGroups"]) == 0:
+            while len(
+                    self.asg.describe_auto_scaling_groups(AutoScalingGroupNames=[ECS_ASG_NAME])
+                    ["AutoScalingGroups"]) == 0:
                 # wait for the ASG to launch
                 Infrastructure.LOGGER.info(f"Waiting for auto scaling group to launch instances... "
                                            f"Time elapsed: {elapsed_time}s")
 
-                time.sleep(10)
-                group_details = self.asg.describe_auto_scaling_groups(
-                    AutoScalingGroupNames=[ECS_ASG_NAME]
-                )
                 elapsed_time += 10
+                time.sleep(10)
 
+            group_details = self.asg.describe_auto_scaling_groups(
+                AutoScalingGroupNames=[ECS_ASG_NAME]
+            )
             self.asg_arn = group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]
             Infrastructure.LOGGER.info(f"Auto scaling group created successfully! ASG ARN: {self.asg_arn}")
 
