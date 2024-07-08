@@ -554,6 +554,7 @@ class Infrastructure:
             group_details = self.asg.describe_auto_scaling_groups(
                 AutoScalingGroupNames=[ECS_ASG_NAME]
             )
+            Infrastructure.LOGGER.info(group_details)
             self.asg_arn = group_details["AutoScalingGroups"][0]["AutoScalingGroupARN"]
 
             Infrastructure.LOGGER.info(f"Auto scaling group created successfully! ASG ARN: {self.asg_arn}")
