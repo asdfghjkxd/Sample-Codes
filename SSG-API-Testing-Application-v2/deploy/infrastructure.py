@@ -507,17 +507,22 @@ class Infrastructure:
                 f"Launch template created successfully! Launch Template ID: {self.ecs_launch_template_id}")
 
     def _create_or_reuse_auto_scaling_group(self):
-        try:
-            asgs = self.asg.describe_auto_scaling_groups(
-                AutoScalingGroupNames=[
-                    ECS_ASG_NAME
-                ]
-            )
+        asgs = self.asg.describe_auto_scaling_groups(
+            Filters=[
+                {
+                    "Name": "auto-scaling-group",
+                    "Values": [
+                        ECS_ASG_NAME
+                    ]
+                }
+            ]
+        )
 
+        if len(asgs["AutoScalingGroups"]) > 0:
             Infrastructure.LOGGER.warning(f"Auto scaling group with name {ECS_ASG_NAME} already exists! "
                                           f"Reusing existing auto scaling group...")
             self.asg_arn = asgs["AutoScalingGroups"][0]["AutoScalingGroupARN"]
-        except ClientError:
+        else:
             Infrastructure.LOGGER.info("Creating auto scaling group...")
             self.asg.create_auto_scaling_group(
                 AutoScalingGroupName="ssg-wsg-asg",
