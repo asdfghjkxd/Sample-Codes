@@ -616,7 +616,9 @@ class Infrastructure:
 
             # reuse cluster
             Infrastructure.LOGGER.warning(
-                f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
+                f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Checking to ensure that it is active...")
+
+            print(clusters)
             self.ecs_cluster_arn = clusters["clusters"][0]["clusterArn"]
         except ClientError:
             # create cluster to use instead of reusing default cluster
