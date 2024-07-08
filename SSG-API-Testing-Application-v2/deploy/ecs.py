@@ -164,7 +164,7 @@ class ECS:
         else:
             ECS.LOGGER.info("Creating ECS service...")
             create_service = self.ecs.create_service(
-                cluster=os.getenv("ECS_CLUSTER_ARN"),
+                cluster=ECS_CLUSTER_NAME,
                 serviceName=ECS_SERVICE_NAME,
                 taskDefinition=self.ecs_task_definition_arn,
                 desiredCount=1,
