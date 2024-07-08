@@ -15,7 +15,7 @@ from prettytable import PrettyTable
 
 from constants import (CIDR_BLOCK, SUBNET_CIDR_ONE, SUBNET_CIDR_TWO, SUBNET_CIDR_THREE, ECS_CLUSTER_NAME, ECS_IMAGE_AMI,
                        ECS_LAUNCH_TEMPLATE_NAME, ECS_ASG_NAME, ECS_CAPACITY_PROVIDER_NAME, ECR_REPO_NAME,
-                       SG_GROUP_NAME, CONTAINER_APPLICATION_PORT, AWS_REGION)
+                       SG_GROUP_NAME, CONTAINER_APPLICATION_PORT, AWS_REGION, INSTANCE_PROFILE_NAME)
 from botocore.config import Config
 
 
@@ -51,6 +51,7 @@ class Infrastructure:
         self.subnet_id_2: str = None
         self.subnet_id_3: str = None
         self.sg_id: str = None
+        self.instance_profile_arn: str = None
         self.asg_arn: str = None
         self.ecs_cluster_arn: str = None
         self.ecs_launch_template_id: str = None
@@ -61,6 +62,7 @@ class Infrastructure:
         self.asg = boto3.client("autoscaling", config=Infrastructure.CONFIG)
         self.ecr = boto3.client("ecr", config=Infrastructure.CONFIG)
         self.ecs = boto3.client("ecs", config=Infrastructure.CONFIG)
+        self.iam = boto3.client("iam", config=Infrastructure.CONFIG)
 
         # call setup methods and export exportable variables to env file if it exists
         self._setup()
@@ -77,6 +79,8 @@ class Infrastructure:
         self._create_or_reuse_subnets()
         self._associate_subnets_with_routing_table()
         self._create_or_reuse_security_groups()
+        self._create_or_reuse_instance_profile()
+        self._add_role_to_instance_profile()
         self._create_or_reuse_launch_template()
         self._create_or_reuse_auto_scaling_group()
         self._create_or_reuse_ecr_repo()
@@ -446,6 +450,29 @@ class Infrastructure:
             )
             Infrastructure.LOGGER.info("Security group ingress rules authorized successfully!")
 
+    def _create_or_reuse_instance_profile(self):
+        iam_prof = self.iam.list_instance_profiles()
+
+        if INSTANCE_PROFILE_NAME not in map(lambda x: x["InstanceProfileName"], iam_prof["InstanceProfiles"]):
+            Infrastructure.LOGGER.info("Creating instance profile...")
+            ip = self.iam.create_instance_profile(
+                InstanceProfileName=INSTANCE_PROFILE_NAME
+            )
+            self.instance_profile_arn = ip["InstanceProfile"]["Arn"]
+            Infrastructure.LOGGER.info(f"Instance profile created successfully! "
+                                       f"Instance Profile ARN: {self.instance_profile_arn}")
+        else:
+            Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
+            self.instance_profile_arn = list(filter(lambda x: x["InstanceProfileName"] == INSTANCE_PROFILE_NAME,
+                                                    iam_prof["InstanceProfiles"]))[0]["Arn"]
+
+    def _add_role_to_instance_profile(self):
+        # add role to instance profile
+        self.iam.add_role_to_instance_profile(
+            InstanceProfileName=INSTANCE_PROFILE_NAME,
+            RoleName="AmazonEC2ContainerServiceforEC2Role"
+        )
+
     def _create_or_reuse_launch_template(self):
         lts = self.ec2.describe_launch_templates(
             Filters=[
@@ -469,6 +496,9 @@ class Infrastructure:
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
                 LaunchTemplateData={
+                    "IamInstanceProfile": {
+                        "Arn": self.instance_profile_arn
+                    },
                     "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
@@ -490,10 +520,12 @@ class Infrastructure:
                     "SecurityGroupIds": [
                         self.sg_id
                     ],
-                    "UserData": base64.b64encode(f"""
-                                                 #!/bin/bash
-                                                 echo ECS_CLUSTER={ECS_CLUSTER_NAME} >> /etc/ecs/ecs.config
-                                                 """.encode("utf-8")).decode("utf-8")
+                    "UserData": base64.b64encode(
+                        ("#!/bin/bash\n"
+                         "cat <<'EOF' >> /etc/ecs/ecs.config\n"
+                         "ECS_CLUSTER=your_cluster_name\n"
+                         "ECS_CONTAINER_INSTANCE_TAGS={'Name': '" + ECS_ASG_NAME + "'}\n"
+                         "EOF").encode("utf-8")).decode("utf-8")
                 }
             )
 
@@ -597,9 +629,9 @@ class Infrastructure:
                                           f"Checking to ensure that it is active...")
 
             if any(map(lambda x: x["status"] != "ACTIVE", self.ecs.describe_capacity_providers(
-                capacityProviders=[
-                    ECS_CAPACITY_PROVIDER_NAME
-                ])["capacityProviders"])):
+                    capacityProviders=[
+                        ECS_CAPACITY_PROVIDER_NAME
+                    ])["capacityProviders"])):
                 Infrastructure.LOGGER.warning("Capacity provider is inactive! Deleting capacity provider and "
                                               "attempting to re-create it...")
                 self.ecs.delete_capacity_provider(

@@ -7,6 +7,7 @@ CIDR_BLOCK = "172.16.0.0/16"
 SUBNET_CIDR_ONE = "172.16.0.0/19"
 SUBNET_CIDR_TWO = "172.16.32.0/19"
 SUBNET_CIDR_THREE = "172.16.64.0/19"
+INSTANCE_PROFILE_NAME = "ssg-ecs-instance-profile"
 ECS_CLUSTER_NAME = "ssg-ecs-app"
 ECS_IMAGE_AMI = "ami-0153fd8c2692db1b7"  # this is an AWS Linux 2023 ECS AMI
 ECS_LAUNCH_TEMPLATE_NAME = "ssg-ecs-launch-template"
@@ -33,6 +34,7 @@ def load():
         os.putenv("SUBNET_CIDR_ONE", SUBNET_CIDR_ONE)
         os.putenv("SUBNET_CIDR_TWO", SUBNET_CIDR_TWO)
         os.putenv("SUBNET_CIDR_THREE", SUBNET_CIDR_THREE)
+        os.putenv("INSTANCE_PROFILE_NAME", INSTANCE_PROFILE_NAME)
         os.putenv("ECS_CLUSTER_NAME", ECS_CLUSTER_NAME)
         os.putenv("ECS_IMAGE_AMI", ECS_IMAGE_AMI)
         os.putenv("ECS_LAUNCH_TEMPLATE_NAME", ECS_LAUNCH_TEMPLATE_NAME)
@@ -53,6 +55,7 @@ def load():
         f.write(f"SUBNET_CIDR_ONE={SUBNET_CIDR_ONE}\n")
         f.write(f"SUBNET_CIDR_TWO={SUBNET_CIDR_TWO}\n")
         f.write(f"SUBNET_CIDR_THREE={SUBNET_CIDR_THREE}\n")
+        f.write(f"INSTANCE_PROFILE_NAME={INSTANCE_PROFILE_NAME}\n")
         f.write(f"ECS_CLUSTER_NAME={ECS_CLUSTER_NAME}\n")
         f.write(f"ECS_IMAGE_AMI={ECS_IMAGE_AMI}")
         f.write(f"ECS_LAUNCH_TEMPLATE_NAME={ECS_LAUNCH_TEMPLATE_NAME}\n")
@@ -77,6 +80,7 @@ def echo_vars():
     ptable.add_row(["SUBNET_CIDR_ONE", SUBNET_CIDR_ONE])
     ptable.add_row(["SUBNET_CIDR_TWO", SUBNET_CIDR_TWO])
     ptable.add_row(["SUBNET_CIDR_THREE", SUBNET_CIDR_THREE])
+    ptable.add_row(["INSTANCE_PROFILE_NAME", INSTANCE_PROFILE_NAME])
     ptable.add_row(["ECS_CLUSTER_NAME", ECS_CLUSTER_NAME])
     ptable.add_row(["ECS_IMAGE_AMI", ECS_IMAGE_AMI])
     ptable.add_row(["ECS_LAUNCH_TEMPLATE_NAME", ECS_LAUNCH_TEMPLATE_NAME])
