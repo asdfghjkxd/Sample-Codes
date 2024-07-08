@@ -12,7 +12,7 @@ from prettytable import PrettyTable
 from botocore.config import Config
 
 from constants import ECS_TASK_DEFINITION_FAMILY, ECS_SERVICE_NAME, ECS_TASK_MEMORY, ECS_TASK_CPU, \
-    CONTAINER_APPLICATION_PORT, ECS_CONTAINER_NAME
+    CONTAINER_APPLICATION_PORT, ECS_CONTAINER_NAME, AWS_REGION
 
 
 class ECS:
@@ -35,7 +35,7 @@ class ECS:
 
     # set up AWS client config
     CONFIG = Config(
-        region_name="ap-southeast-1"  # CHANGE THIS TO YOUR REGION OF CHOICE
+        region_name=AWS_REGION  # CHANGE THIS TO YOUR REGION OF CHOICE
     )
 
     def __init__(self):
@@ -43,10 +43,6 @@ class ECS:
         self.ecs_task_definition_arn: str = None
 
         # define clients and resources
-        self.table = None  # type: boto3.resource("ec2").RouteTable
-        self.ec2 = boto3.client("ec2", config=ECS.CONFIG)
-        self.asg = boto3.client("autoscaling", config=ECS.CONFIG)
-        self.ecr = boto3.client("ecr", config=ECS.CONFIG)
         self.ecs = boto3.client("ecs", config=ECS.CONFIG)
 
         # call setup methods and export exportable variables to env file if it exists
@@ -101,14 +97,7 @@ class ECS:
         tabulated.add_row(["ECS Task Definition ARN", self.ecs_task_definition_arn])
 
 
-        ECS.LOGGER.info(
-            f"""
-            ################################################################################
-            #                           Relevant Setup Information                         #
-            ################################################################################
-            {tabulated}
-            """
-        )
+        print(tabulated)
 
     def _create_task_definition(self):
         ECS.LOGGER.info("Creating task definition...")

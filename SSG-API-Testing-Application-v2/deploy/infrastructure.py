@@ -587,7 +587,7 @@ class Infrastructure:
 
     def _create_or_reuse_capacity_provider(self):
         try:
-            cap_provs = self.ecs.describe_capacity_providers(
+            self.ecs.describe_capacity_providers(
                 capacityProviders=[
                     ECS_CAPACITY_PROVIDER_NAME
                 ]
@@ -617,7 +617,7 @@ class Infrastructure:
             # reuse cluster
             Infrastructure.LOGGER.warning(
                 f"ECS cluster with name {ECS_CLUSTER_NAME} already exists! Reusing existing cluster...")
-            self.ecs_cluster_arn = clusters["clusters"][0]["clusterArn"]
+            self.ecs_cluster_arn = clusters["clusters"][-1]["clusterArn"]
         except ClientError:
             # create cluster to use instead of reusing default cluster
             Infrastructure.LOGGER.info("Creating ECS cluster...")
