@@ -470,7 +470,6 @@ class Infrastructure:
         else:
             # launch template is not found
             Infrastructure.LOGGER.info("Creating launch template...")
-            user_data =
 
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
