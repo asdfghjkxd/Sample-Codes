@@ -4,6 +4,7 @@ IaC template for creating base cloud environment
 Inspired from https://aws.plainenglish.io/creating-vpc-using-boto3-terraform-cloudformation-and-both-af741a8afb3c
 """
 import base64
+import json
 import os
 import time
 
@@ -79,8 +80,7 @@ class Infrastructure:
         self._create_or_reuse_subnets()
         self._associate_subnets_with_routing_table()
         self._create_or_reuse_security_groups()
-        # self._create_or_reuse_instance_profile()
-        # self._add_role_to_instance_profile()
+        self._setup_role()
         self._create_or_reuse_launch_template()
         self._create_or_reuse_auto_scaling_group()
         self._create_or_reuse_ecr_repo()
@@ -450,28 +450,53 @@ class Infrastructure:
             )
             Infrastructure.LOGGER.info("Security group ingress rules authorized successfully!")
 
-    def _create_or_reuse_instance_profile(self):
-        iam_prof = self.iam.list_instance_profiles()
+    def _setup_role(self):
+        try:
+            self.iam.get_role(RoleName="AmazonEC2ContainerServiceforEC2Role")
+            Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
+        except self.iam.exceptions.NoSuchEntityException:
+            role_policy = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com"
+                        },
+                        "Action": "sts:AssumeRole"
+                    }
+                ]
+            }
 
-        if INSTANCE_PROFILE_NAME not in map(lambda x: x["InstanceProfileName"], iam_prof["InstanceProfiles"]):
+            self.iam.create_role(
+                RoleName="AmazonEC2ContainerServiceforEC2Role",
+                AssumeRolePolicyDocument=json.dumps(role_policy)
+            )
+
+            self.iam.attach_role_policy(
+                RoleName="AmazonEC2ContainerServiceforEC2Role",
+                PolicyArn="arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+            )
+
+        try:
+            self.instance_profile_arn = self.iam.get_instance_profile(
+                InstanceProfileName=INSTANCE_PROFILE_NAME
+            )["InstanceProfile"]["Arn"]
+        except Exception:
             Infrastructure.LOGGER.info("Creating instance profile...")
-            ip = self.iam.create_instance_profile(
+            instance_profile = self.iam.create_instance_profile(
                 InstanceProfileName=INSTANCE_PROFILE_NAME
             )
-            self.instance_profile_arn = ip["InstanceProfile"]["Arn"]
-            Infrastructure.LOGGER.info(f"Instance profile created successfully! "
-                                       f"Instance Profile ARN: {self.instance_profile_arn}")
-        else:
-            Infrastructure.LOGGER.warning("Instance profile already exists! Skipping creation...")
-            self.instance_profile_arn = list(filter(lambda x: x["InstanceProfileName"] == INSTANCE_PROFILE_NAME,
-                                                    iam_prof["InstanceProfiles"]))[0]["Arn"]
+            self.instance_profile_arn = instance_profile["InstanceProfile"]["Arn"]
+            Infrastructure.LOGGER.info(
+                f"Instance profile created successfully! Instance Profile ARN: {self.instance_profile_arn}")
 
-    def _add_role_to_instance_profile(self):
-        # add role to instance profile
-        self.iam.add_role_to_instance_profile(
-            InstanceProfileName=INSTANCE_PROFILE_NAME,
-            RoleName="AmazonEC2ContainerServiceforEC2Role"
-        )
+            self.iam.add_role_to_instance_profile(
+                InstanceProfileName=INSTANCE_PROFILE_NAME,
+                RoleName="AmazonEC2ContainerServiceforEC2Role"
+            )
+
+            Infrastructure.LOGGER.info("Role added to instance profile successfully!")
 
     def _create_or_reuse_launch_template(self):
         lts = self.ec2.describe_launch_templates(
@@ -496,9 +521,9 @@ class Infrastructure:
             launch_template = self.ec2.create_launch_template(
                 LaunchTemplateName=ECS_LAUNCH_TEMPLATE_NAME,
                 LaunchTemplateData={
-                    # "IamInstanceProfile": {
-                    #     "Arn": self.instance_profile_arn
-                    # },
+                    "IamInstanceProfile": {
+                        "Arn": self.instance_profile_arn
+                    },
                     "BlockDeviceMappings": [
                         {
                             "DeviceName": "/dev/xvda",
