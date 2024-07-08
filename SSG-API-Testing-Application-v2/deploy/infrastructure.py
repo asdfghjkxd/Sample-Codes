@@ -129,12 +129,7 @@ class Infrastructure:
         tabulated.add_row(["ECS Cluster ARN", self.ecs_cluster_arn])
         tabulated.add_row(["ECS Launch Template ID", self.ecs_launch_template_id])
 
-        Infrastructure.LOGGER.info(
-            f"################################################################################\n"
-            f"#                           Relevant Setup Information                         #\n"
-            f"################################################################################\n"
-            f"{tabulated}"
-        )
+        print(tabulated)
 
     def _create_or_reuse_vpc(self):
         # check if the VPC already exists
@@ -550,32 +545,6 @@ class Infrastructure:
                     }
                 ]
             )
-
-            elapsed_time = 0
-            while len(
-                    self.asg.describe_auto_scaling_groups(
-                        Filters=[
-                            {
-                                "Name": "tag-key",
-                                "Values": [
-                                    "Name"
-                                ]
-                            },
-                            {
-                                "Name": "tag-value",
-                                "Values": [
-                                    ECS_ASG_NAME
-                                ]
-                            }
-                        ]
-                    )
-                    ["AutoScalingGroups"]) == 0:
-                # wait for the ASG to launch
-                Infrastructure.LOGGER.info(f"Waiting for auto scaling group to launch instances... "
-                                           f"Time elapsed: {elapsed_time}s")
-
-                elapsed_time += 10
-                time.sleep(10)
 
             group_details = self.asg.describe_auto_scaling_groups(
                 Filters=[
