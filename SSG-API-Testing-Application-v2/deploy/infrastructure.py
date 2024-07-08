@@ -510,7 +510,13 @@ class Infrastructure:
         asgs = self.asg.describe_auto_scaling_groups(
             Filters=[
                 {
-                    "Name": "auto-scaling-group",
+                    "Name": "tag-key",
+                    "Values": [
+                        "Name"
+                    ]
+                },
+                {
+                    "Name": "tag-value",
                     "Values": [
                         ECS_ASG_NAME
                     ]
@@ -535,6 +541,15 @@ class Infrastructure:
                 DesiredCapacity=1,
                 AvailabilityZones=["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"],
                 VPCZoneIdentifier=f"{self.subnet_id_1},{self.subnet_id_2},{self.subnet_id_3}",
+                Tags=[
+                    {
+                        "ResourceId": ECS_ASG_NAME,
+                        "ResourceType": "auto-scaling-group",
+                        "Key": "Name",
+                        "Value": ECS_ASG_NAME,
+                        "PropagateAtLaunch": False
+                    }
+                ]
             )
 
             group_details = self.asg.describe_auto_scaling_groups(
