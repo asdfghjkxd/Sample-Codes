@@ -543,7 +543,6 @@ class Infrastructure:
                 VPCZoneIdentifier=f"{self.subnet_id_1},{self.subnet_id_2},{self.subnet_id_3}",
                 Tags=[
                     {
-                        "ResourceId": ECS_ASG_NAME,
                         "ResourceType": "auto-scaling-group",
                         "Key": "Name",
                         "Value": ECS_ASG_NAME,
