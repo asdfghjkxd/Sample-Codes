@@ -12,7 +12,7 @@ from prettytable import PrettyTable
 from botocore.config import Config
 
 from constants import ECS_TASK_DEFINITION_FAMILY, ECS_SERVICE_NAME, ECS_TASK_MEMORY, ECS_TASK_CPU, \
-    CONTAINER_APPLICATION_PORT, ECS_CONTAINER_NAME, AWS_REGION
+    CONTAINER_APPLICATION_PORT, ECS_CONTAINER_NAME, AWS_REGION, ECS_CLUSTER_NAME
 
 
 class ECS:
@@ -147,11 +147,13 @@ class ECS:
 
     def _create_or_update_service(self):
         svcs = self.ecs.describe_services(
-            cluster=os.getenv("ECS_CLUSTER_ARN"),
+            cluster=ECS_CLUSTER_NAME,
             services=[
                 ECS_SERVICE_NAME
             ]
         )
+
+        print(svcs)
 
         if len(svcs["services"]) > 0:
             # service exists, so we update it instead
