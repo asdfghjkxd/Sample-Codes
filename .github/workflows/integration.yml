@@ -148,7 +148,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           terraform apply -auto-approve
-          echo "uri=$(terraform output app_url)" >> $GITHUB_OUTPUT
+          uri=$(terraform output app_url)
+          uri="$uri%\"}"
+          uri="${uri#\"}"
+          echo "uri=$uri" >> $GITHUB_OUTPUT
 
   upload-docker:
     name: Upload Docker Container to ECR
