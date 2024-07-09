@@ -145,7 +145,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           terraform apply -auto-approve
-          echo "ECR_REPO_URL=$(terraform output app_url)" >> $GITHUB_ENV
+          echo $(terraform output app_url) >> $GITHUB_OUTPUT
 
   upload-docker:
     name: Upload Docker Container to ECR
@@ -172,14 +172,12 @@ jobs:
         id: create-and-push-docker-image
         working-directory: SSG-API-Testing-Application-v2/app
         env:
-          REGISTRY_REPOSITORY: ${{ env.ECR_REPO_URL }}
+          REGISTRY_REPOSITORY: ${{ needs.create-ecr.outputs.apply-ecr }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo ${{ env.ECR_REPO_URL }}
-          echo $REGISTRY_REPOSITORY
           docker build -t $REGISTRY_REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY_REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URI=$REGISTRY_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+          echo "$REGISTRY_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   main-infra:
     #    if: github.event.review.state == 'approved'
@@ -225,5 +223,5 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPO_URL: ${{ env.IMAGE_URI }}
+          REPO_URL: ${{ needs.upload-docker.outputs.create-and-push-docker-image }}
         run: terraform apply -auto-approve
