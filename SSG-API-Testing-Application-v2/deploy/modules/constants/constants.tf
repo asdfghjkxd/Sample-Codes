@@ -104,11 +104,11 @@ output "ECS_SERVICE_NAME" {
 }
 
 output "ECS_TASK_MEMORY" {
-  value = 768
+  value = 512
 }
 
 output "ECS_TASK_CPU" {
-  value = 512
+  value = 256
 }
 
 output "CONTAINER_APPLICATION_PORT" {
