@@ -95,6 +95,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
+        continue-on-error: true  # possible errors are to do with the presence of the bucket
 
   verify:
     needs:
