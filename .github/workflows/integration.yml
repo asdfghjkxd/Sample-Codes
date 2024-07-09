@@ -83,11 +83,17 @@ jobs:
       - name: View Backend Plan
         id: plan-backend
         working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform plan
 
       - name: Apply Terraform Plan
         id: apply-backend
         working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
 
   verify:
