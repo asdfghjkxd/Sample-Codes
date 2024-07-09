@@ -229,5 +229,5 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPO_URL: ${{ needs.upload-docker.outputs.uri }}
+          TF_VAR_REPO_URL: ${{ needs.upload-docker.outputs.uri }}
         run: terraform apply -auto-approve
