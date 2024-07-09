@@ -18,6 +18,9 @@ env:
   TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
   TF_WORKSPACE: ""
   TF_BUCKET_NAME: "ssg-tf-bucket"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 
 jobs:
 #  test:
@@ -117,7 +120,8 @@ jobs:
       - name: Initialise Backend
         id: init-ecr
         working-directory: ./SSG-API-Testing-Application-v2/deploy/create-ecr
-        run: terraform init
+        run: |
+          terraform init -backend-config="access_key=$AWS_ACCESS_KEY_ID" -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY"
 
       - name: Validate Terraform Script
         id: create-ecr-validate
@@ -194,7 +198,8 @@ jobs:
       - name: Initialise Backend
         id: init-main
         working-directory: ./SSG-API-Testing-Application-v2/deploy/main-infrastructure
-        run: terraform init
+        run: |
+          terraform init -backend-config="access_key=$AWS_ACCESS_KEY_ID" -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY"
 
       - name: Validate Terraform Script
         id: create-main-validate
