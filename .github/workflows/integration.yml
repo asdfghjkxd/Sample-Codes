@@ -187,8 +187,8 @@ jobs:
 
   main-infra:
     #    if: github.event.review.state == 'approved'
-#    needs:
-#      - upload-docker
+    needs:
+      - upload-docker
     runs-on: ubuntu-latest
     name: Create Main Infrastructure
 
