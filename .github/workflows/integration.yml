@@ -70,15 +70,15 @@ jobs:
         working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
         run: terraform fmt -check
 
-      - name: Validate Terraform Script
-        id: create-backend-validate
-        working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
-        run: terraform validate
-
       - name: Initialise Backend
         id: init-backend
         working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
         run: terraform init
+
+      - name: Validate Terraform Script
+        id: create-backend-validate
+        working-directory: ./SSG-API-Testing-Application-v2/deploy/create-backend
+        run: terraform validate
 
       - name: View Backend Plan
         id: plan-backend
