@@ -121,8 +121,6 @@ resource "aws_ecs_task_definition" "app" {
           hostPort      = module.constants.CONTAINER_APPLICATION_PORT
         }
       ]
-      memory = module.constants.ECS_TASK_MEMORY
-      cpu    = module.constants.ECS_TASK_CPU
     }
   ])
   requires_compatibilities = ["FARGATE"]
