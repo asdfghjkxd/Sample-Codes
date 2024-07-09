@@ -150,40 +150,40 @@ jobs:
 #          terraform apply -auto-approve
 #          echo "uri=$(terraform output -raw app_url)" >> $GITHUB_OUTPUT
 #
-#  upload-docker:
-#    name: Upload Docker Container to ECR
+  upload-docker:
+    name: Upload Docker Container to ECR
 #    needs:
 #      - create-ecr
-#    runs-on: ubuntu-latest
-#    outputs:
-#      uri: ${{ steps.create-and-push-docker-image.outputs.uri }}
-#
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v4
-#
-#      - name: Configure AWS Credentials
-#        id: configure-credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws-region: ${{ env.AWS_REGION }}
-#
-#      - name: Login to ECR
-#        id: login-ecr
-#        uses: aws-actions/amazon-ecr-login@v2
-#
-#      - name: Create and Push Docker Image to ECR
-#        id: create-and-push-docker-image
-#        working-directory: SSG-API-Testing-Application-v2/app
-#        env:
-#          REGISTRY_REPOSITORY: ${{ needs.create-ecr.outputs.uri }}
-#          IMAGE_TAG: ${{ github.sha }}
-#        run: |
-#          docker build -t $REGISTRY_REPOSITORY:$IMAGE_TAG .
-#          docker push $REGISTRY_REPOSITORY:$IMAGE_TAG
-#          echo "uri=$REGISTRY_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    runs-on: ubuntu-latest
+    outputs:
+      uri: ${{ steps.create-and-push-docker-image.outputs.uri }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        id: configure-credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create and Push Docker Image to ECR
+        id: create-and-push-docker-image
+        working-directory: SSG-API-Testing-Application-v2/app
+        env:
+          REGISTRY_REPOSITORY: ${{ needs.create-ecr.outputs.uri }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY_REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY_REPOSITORY:$IMAGE_TAG
+          echo "uri=$REGISTRY_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   main-infra:
     #    if: github.event.review.state == 'approved'
