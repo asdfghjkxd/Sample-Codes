@@ -145,7 +145,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           terraform apply -auto-approve
-          echo "ECR_REPO_URL=$(terraform output app_url)\n" >> $GITHUB_ENV
+          echo "ECR_REPO_URL=$(terraform output app_url)" >> $GITHUB_ENV
 
   upload-docker:
     name: Upload Docker Container to ECR
@@ -175,6 +175,8 @@ jobs:
           REGISTRY_REPOSITORY: ${{ env.ECR_REPO_URL }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          echo ${{ env.ECR_REPO_URL }}
+          echo $REGISTRY_REPOSITORY
           docker build -t $REGISTRY_REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY_REPOSITORY:$IMAGE_TAG
           echo "IMAGE_URI=$REGISTRY_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
