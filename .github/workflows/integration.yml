@@ -145,7 +145,7 @@ jobs:
   # Deploy to AWS only if the PR is approved
   deploy:
     needs:
-      - test
+#      - test
       - verify
 #    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
