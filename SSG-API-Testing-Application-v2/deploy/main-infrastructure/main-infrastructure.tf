@@ -112,8 +112,8 @@ resource "aws_ecs_task_definition" "app" {
   family = module.constants.ECS_TASK_DEFINITION_FAMILY
   container_definitions = jsonencode([
     {
-      name = module.constants.ECS_CONTAINER_NAME
-      image = var.REPO_URL
+      name      = module.constants.ECS_CONTAINER_NAME
+      image     = var.REPO_URL
       essential = true
       portMappings = [
         {
@@ -122,29 +122,29 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]
       memory = module.constants.ECS_TASK_MEMORY
-      cpu = module.constants.ECS_TASK_CPU
+      cpu    = module.constants.ECS_TASK_CPU
     }
   ])
   requires_compatibilities = ["FARGATE"]
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.ecs_exec_role.arn
-  task_role_arn      = aws_iam_role.ecs_task_role.arn
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.ecs_exec_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
 
 }
 
 # Create ALB SG
 resource "aws_security_group" "alb_sg" {
   ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -162,11 +162,11 @@ resource "aws_alb" "alb" {
 
 # Create Target Group
 resource "aws_lb_target_group" "app_tg" {
-  name = module.constants.TARGET_GROUP_NAME
-  port = module.constants.CONTAINER_APPLICATION_PORT
-  protocol = "HTTP"
+  name        = module.constants.TARGET_GROUP_NAME
+  port        = module.constants.CONTAINER_APPLICATION_PORT
+  protocol    = "HTTP"
   target_type = "ip"
-  vpc_id = aws_default_vpc.default.id
+  vpc_id      = aws_default_vpc.default.id
 }
 
 # Create Listener
@@ -184,16 +184,16 @@ resource "aws_lb_listener" "app_listener" {
 # Create ECS Service
 resource "aws_security_group" "service_sg" {
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = [module.constants.IPV4_ALL_CIDR]
   }
 }
@@ -206,7 +206,7 @@ resource "aws_ecs_service" "app" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [
+    subnets = [
       aws_default_subnet.subnet_1.id,
       aws_default_subnet.subnet_2.id,
       aws_default_subnet.subnet_3.id
