@@ -56,7 +56,7 @@ output "ALB_NAME" {
 }
 
 output "TARGET_GROUP_NAME" {
-  value = "tg-"
+  value = "tg"
 }
 
 output "ECS_SECURITY_GROUP_NAME" {
@@ -65,6 +65,10 @@ output "ECS_SECURITY_GROUP_NAME" {
 
 output "ECS_CLUSTER_NAME" {
   value = "ssg-ecs-cluster"
+}
+
+output "ECS_EXECUTION_ROLE_NAME" {
+  value = "ssg-ecs-execution-role"
 }
 
 output "ECS_LAUNCH_TEMPLATE_NAME" {
@@ -96,7 +100,7 @@ output "ECR_REPO_NAME" {
 }
 
 output "ECS_TASK_DEFINITION_FAMILY" {
-  value = "ssg-wsg-app-"
+  value = "ssg-wsg-app"
 }
 
 output "ECS_SERVICE_NAME" {
