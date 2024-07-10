@@ -56,8 +56,8 @@ resource "null_resource" "image" {
 
 data "aws_ecr_image" "latest" {
   repository_name = aws_ecr_repository.app.name
-  image_tag = "latest"
-  depends_on = [null_resource.image]
+  image_tag       = "latest"
+  depends_on      = [null_resource.image]
 }
 
 # Create cluster
@@ -109,9 +109,9 @@ resource "aws_ecs_task_definition" "task" {
   ])
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  memory = 512
-  cpu = 256
-  execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
+  memory                   = 512
+  cpu                      = 256
+  execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
 }
 
 # Create Reference to default VPC
@@ -137,7 +137,7 @@ resource "aws_alb" "lb" {
   name               = module.constants.ALB_NAME
   load_balancer_type = "application"
   security_groups    = [aws_security_group.ssg_lb_sg.id]
-  subnets            = [
+  subnets = [
     aws_default_subnet.default_subnet_a.id,
     aws_default_subnet.default_subnet_b.id,
     aws_default_subnet.default_subnet_c.id
@@ -147,31 +147,31 @@ resource "aws_alb" "lb" {
 # Create Security Group
 resource "aws_security_group" "ssg_lb_sg" {
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 # Create TG
 resource "aws_lb_target_group" "aws_tg" {
-  name = module.constants.TARGET_GROUP_NAME
-  port = 80
-  protocol = "HTTP"
+  name        = module.constants.TARGET_GROUP_NAME
+  port        = 80
+  protocol    = "HTTP"
   target_type = "ip"
-  vpc_id = aws_default_vpc.default_vpc.id
+  vpc_id      = aws_default_vpc.default_vpc.id
 
   health_check {
     matcher = "200, 301, 302"
-    path = "/"
+    path    = "/"
   }
 }
 
@@ -182,23 +182,23 @@ resource "aws_lb_listener" "aws_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.aws_tg.arn
   }
 }
 
 # Create Service
 resource "aws_ecs_service" "service" {
-  name = module.constants.ECS_SERVICE_NAME
-  cluster = aws_ecs_cluster.cluster.id
+  name            = module.constants.ECS_SERVICE_NAME
+  cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.task.arn
-  launch_type = "FARGATE"
-  desired_count = 1
+  launch_type     = "FARGATE"
+  desired_count   = 1
 
   load_balancer {
     target_group_arn = aws_lb_target_group.aws_tg.arn
-    container_name = module.constants.ECS_CONTAINER_NAME
-    container_port = 80
+    container_name   = module.constants.ECS_CONTAINER_NAME
+    container_port   = 80
   }
 
   network_configuration {
@@ -208,23 +208,23 @@ resource "aws_ecs_service" "service" {
       aws_default_subnet.default_subnet_c.id
     ]
     assign_public_ip = true
-    security_groups = [aws_security_group.ssg_service_sg.id]
+    security_groups  = [aws_security_group.ssg_service_sg.id]
   }
 }
 
 # Create SG for Service
 resource "aws_security_group" "ssg_service_sg" {
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [aws_security_group.ssg_lb_sg.id]
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
