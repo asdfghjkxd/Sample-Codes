@@ -68,7 +68,7 @@ resource "aws_ecs_cluster" "cluster" {
 # Create IAM policy document for ecsTaskExecutionRole
 data "aws_iam_policy_document" "assume_role_policy" {
   statement {
-    actions = ["sts.AssumeRole"]
+    actions = ["sts:AssumeRole"]
 
     principals {
       identifiers = ["ecs-tasks.amazonaws.com"]
@@ -170,7 +170,7 @@ resource "aws_lb_target_group" "aws_tg" {
   vpc_id      = aws_default_vpc.default_vpc.id
 
   health_check {
-    matcher = "200, 301, 302"
+    matcher = "200,301,302"
     path    = "/"
   }
 }
